@@ -2,281 +2,361 @@
 
 **Real-Time AIOps Platform for Predictive Incident Detection in Cloud Services**
 
----
-
-**Course:** CS6905 – Cloud Information Management Systems  
-**Instructor:** Dr. Shadi Aljendi  
-**Team:** Alfarizy Alfarizy (3810253), Akinbobola Akin (3784664), Ishimwe Pacis Hanyurwimfura (3787234)  
-**Date:** February 25, 2026
+**Course:** CS6905 – Cloud Information Management Systems
+**Instructor:** Dr. Shadi Aljendi
+**Team:** Alfarizy Alfarizy (3810253), Akinbobola Akin (3784664), Ishimwe Pacis Hanyurwimfura (3787234)
 
 ---
 
-## 1. Overview
+## 1. What This Project Does
 
-CloudWatch AI is a real-time AIOps platform that predicts cloud service incidents before they impact users. Instead of relying on reactive threshold-based alerts, the system uses a trained Gradient Boosting classifier on streaming KPI metrics and log-derived signals to issue early warnings with high precision and actionable lead times. The platform runs entirely within AWS free-tier constraints.
+CloudWatch AI predicts cloud service incidents before they happen. Instead of alerting operators after something breaks, the system uses machine learning to warn them early — giving them time to act.
 
-### 1.1 Core Objective
+The best model achieves **0.91 precision** with **~36 minutes of warning** before incidents, while keeping false alarms to at most one per service per day.
 
-Deliver at least **15 minutes of warning** before an incident occurs, with **prediction precision > 0.85**, while keeping false alarms below **one per KPI per 24 hours**.
+---
 
-### 1.2 Key Results (from Paper)
+## 2. How It Works (Big Picture)
 
-| Metric | Value |
+The platform simulates 5 cloud services running in real time. Every minute, a Lambda function generates fake KPI metrics and logs — as if real services are running. This data flows through the ML pipeline automatically, and the dashboard updates live so the user can watch the system detect incidents as they happen.
+
+```
+┌──────────────────────────────────────────────────────────────────────┐
+│                          USER'S BROWSER                              │
+│                                                                      │
+│   React + TypeScript + Vite (hosted on S3)                          │
+│                                                                      │
+│   ┌────────────┐  ┌────────────┐  ┌───────────┐  ┌──────────────┐  │
+│   │  Live       │  │  KPI       │  │  Alerts   │  │  Model       │  │
+│   │  Controls   │  │  Timeline  │  │  Panel    │  │  Analytics   │  │
+│   └─────┬──────┘  └─────▲──────┘  └─────▲─────┘  └──────▲───────┘  │
+│         │               │               │                │          │
+└─────────┼───────────────┼───────────────┼────────────────┼──────────┘
+          │               │               │                │
+          ▼               │               │                │
+┌──────────────────────────────────────────────────────────────────────┐
+│                      API GATEWAY (REST)                               │
+│  POST /start  POST /stop  GET /metrics  GET /alerts  GET /analytics  │
+└──┬───────────────────────────┬───────────────┬───────────────┬───────┘
+   │                           │               │               │
+   ▼                           ▼               ▼               ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│                        AWS LAMBDA (Python)                            │
+│                                                                      │
+│  ┌──────────────┐                                                    │
+│  │  EventBridge  │ ─── triggers every 1 minute ──┐                   │
+│  └──────────────┘                                │                   │
+│                                                  ▼                   │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐               │
+│  │  Simulator    │  │  Feature Eng  │  │  Inference   │               │
+│  │  Lambda       │  │  Lambda       │  │  Lambda      │               │
+│  │               │  │               │  │              │               │
+│  │  Generates    │  │  Computes 8   │  │  Loads model │               │
+│  │  fake KPI +   │  │  rolling      │  │  from S3     │               │
+│  │  logs for 5   │  │  features     │  │  Predicts    │               │
+│  │  services     │  │               │  │              │               │
+│  └──────┬────┘  └──▲────┬────┘  └──▲────┬────┘               │
+│         │          │    │          │    │                      │
+│         │     DynamoDB  │     DynamoDB  │                      │
+│         │     Streams   │     Streams   │                      │
+│         ▼          │    ▼          │    ▼                      │
+│  ┌───────────────────────────────────────────┐                │
+│  │           DynamoDB (5 tables)              │                │
+│  │  KPIMetrics → FeatureStore → Alerts       │                │
+│  │  ServiceLogs    Incidents                  │                │
+│  └───────────────────────────────────────────┘                │
+│                                                                │
+│  ┌──────────────┐                                              │
+│  │  S3 Bucket   │  trained_model.pkl + scenario_config.json    │
+│  └──────────────┘                                              │
+└──────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 3. Tech Stack
+
+| Layer | Technology | Where It Runs |
+|---|---|---|
+| Frontend | React + TypeScript + Vite | S3 (static website hosting) |
+| API | Amazon API Gateway | AWS (managed) |
+| Backend | Python Lambda functions | AWS Lambda |
+| Scheduler | Amazon EventBridge | Triggers Simulator Lambda every 1 min |
+| Database | Amazon DynamoDB | AWS (managed) |
+| ML Model | scikit-learn (Gradient Boosting) | Trained locally, deployed as .pkl on S3 |
+| Pipeline triggers | DynamoDB Streams | Automatic, event-driven |
+
+Everything runs on AWS free tier. No servers to manage.
+
+---
+
+## 4. Data Flow
+
+### Step 1: Simulator Generates Data (every 1 minute)
+
+**Amazon EventBridge** triggers the **Simulator Lambda** every minute. This Lambda generates realistic KPI metrics and logs for all 5 cloud services — as if they're actually running. It writes the data directly to DynamoDB.
+
+The simulator follows a **scenario schedule** that controls when incidents happen:
+
+```
+Minutes 0–5:    All services normal
+Minutes 5–7:    Web API response times start creeping up
+Minutes 7–8:    Error rate spikes, DB pool slows down
+Minute 8:       Model fires alert (2 min before full incident)
+Minutes 9–12:   Full incident across Web API + DB Pool
+Minutes 12–15:  Recovery — metrics trend back to normal
+Minutes 15+:    Normal operation resumes
+```
+
+This guarantees an incident happens within the demo window, so the audience can watch the model detect it live.
+
+### Step 2: Feature Engineering (automatic)
+
+When new records land in `KPIMetrics`, **DynamoDB Streams** triggers the **Feature Engineering Lambda**. For each service, it extracts the primary metric and computes 8 rolling features:
+
+| # | Feature | What it captures |
+|---|---|---|
+| 1 | roll_mean | Average level in the window |
+| 2 | roll_max | Peak value in the window |
+| 3 | roll_std | Variability |
+| 4 | roll_slope | Trend direction |
+| 5 | first_diff | Short-term change |
+| 6 | error_rate | Fraction of extreme spikes (z > 3) |
+| 7 | warn_rate | Fraction of large jumps |
+| 8 | severity_change_flag | Sudden shift in error/warn patterns |
+
+These 8 numbers are written to the `FeatureStore` table.
+
+### Step 3: Inference (automatic)
+
+When new features land in `FeatureStore`, **DynamoDB Streams** triggers the **Inference Lambda**. It loads the trained Gradient Boosting model (cached from S3), runs prediction, and if the score exceeds the calibrated threshold → writes an alert to the `Alerts` table.
+
+### Step 4: Dashboard Updates Live
+
+The frontend polls `GET /metrics`, `GET /alerts`, and `GET /analytics` every few seconds. The KPI timeline scrolls forward in real time, and alerts appear the moment the model fires them.
+
+---
+
+## 5. Simulator Lambda
+
+This is the data source for the entire platform. It runs as a Lambda function triggered by EventBridge every 1 minute.
+
+### What It Generates
+
+Each invocation produces one record per service containing rich JSON with different fields per service type (this justifies DynamoDB over a relational DB):
+
+**Web API** — response_time_ms, requests_per_second, error_rate, http_5xx_count
+**Database Pool** — active_connections, query_duration_avg_ms, deadlock_count
+**Message Queue** — queue_depth, consumer_lag, dead_letter_queue_size
+**Auth Service** — login_success_rate, auth_latency_ms, mfa_challenge_rate
+**ML Pipeline** — inference_latency_ms, model_accuracy, data_drift_score
+
+### Scenario Config
+
+The simulator reads a `scenario_config.json` from S3 that defines when incidents occur. This keeps the scenario editable without redeploying the Lambda. Example:
+
+```json
+{
+  "scenario_name": "web_api_degradation",
+  "duration_minutes": 15,
+  "phases": [
+    { "start": 0, "end": 5, "state": "normal" },
+    { "start": 5, "end": 8, "state": "degrading", "services": ["web-api-001", "db-pool-001"] },
+    { "start": 8, "end": 12, "state": "incident", "services": ["web-api-001", "db-pool-001"] },
+    { "start": 12, "end": 15, "state": "recovery" }
+  ]
+}
+```
+
+### How It Tracks Time
+
+The Lambda stores a `simulation_tick` counter in a DynamoDB config table. Each invocation increments the tick by 1, checks the scenario config to determine the current phase, and generates metrics accordingly. The dashboard can call `POST /start` to reset the tick and begin a new scenario, or `POST /stop` to disable the EventBridge rule.
+
+---
+
+## 6. What the Model Actually Sees
+
+The model doesn't see the rich JSON. The Feature Engineering Lambda extracts **one primary metric** per service and computes 8 features from it:
+
+| Service | Primary Metric |
 |---|---|
-| Best precision (GBC KPI+Logs, H=15) | 0.91 |
-| Baseline precision (Static threshold) | 0.63 |
-| Mean lead time (operational window) | ~36 minutes |
-| Median lead time range | 31–38 minutes |
-| False alarm budget | ≤1 per KPI per 24h |
+| Web API | response_time_ms |
+| Database Pool | query_duration_avg_ms |
+| Message Queue | queue_depth |
+| Auth Service | auth_latency_ms |
+| ML Pipeline | inference_latency_ms |
+
+The rich JSON is for **storage and dashboard display**. The model gets a simple 8-number feature vector per timestep.
 
 ---
 
-## 2. Problem Statement
+## 7. DynamoDB Tables
 
-Cloud systems generate continuous streams of event logs and performance metrics. Most organizations still manage incidents reactively—monitoring tools alert only after degradation has begun. This leads to two compounding problems:
-
-1. **No warning time** — operators cannot intervene before outages begin.
-2. **Alert fatigue** — static threshold alerts generate excessive false alarms, causing operators to ignore warnings.
-
-CloudWatch AI addresses both by shifting from reactive detection to **lead-time-aware predictive detection**, where the system anticipates incidents and issues reliable, early warnings.
-
----
-
-## 3. System Architecture
-
-### 3.1 High-Level Pipeline
-
-```
-┌─────────────┐    ┌──────────────┐    ┌───────────────────┐    ┌──────────────┐    ┌────────────┐
-│ Data         │───▶│ DynamoDB     │───▶│ Feature           │───▶│ ML Inference  │───▶│ Dashboard  │
-│ Simulator    │    │ Ingestion    │    │ Engineering       │    │ + Alerting    │    │ + Alerts   │
-└─────────────┘    └──────────────┘    └───────────────────┘    └──────────────┘    └────────────┘
-   5 service          KPIMetrics         Rolling stats +          GBC classifier      Real-time
-   types              ServiceLogs        log-proxy features       multi-horizon        web UI
-```
-
-### 3.2 Component Breakdown
-
-#### Stage 1: Data Simulator
-- Generates realistic metrics and logs from **5 cloud service types**:
-  - Web API (URL paths, response times, HTTP status codes)
-  - Database Pool (connection counts, query durations, pool utilization)
-  - Message Queue (queue depth, throughput, consumer lag)
-  - Authentication Service (login events, MFA flags, failure rates)
-  - ML Pipeline (inference latency, batch throughput, model accuracy drift)
-- Each service emits data continuously at configurable intervals.
-- Simulates both normal operation and incident scenarios (gradual degradation, sudden spikes, cascading failures).
-
-#### Stage 2: Data Ingestion & Storage (DynamoDB)
-- Receives streaming data via AWS Lambda.
-- Stores heterogeneous log schemas as JSON documents in a single table design.
-- Supports high-frequency time-series writes via horizontal scalability.
-- TTL-based automatic data expiration for cost management.
-
-#### Stage 3: Feature Engineering Pipeline
-- Triggered automatically by **DynamoDB Streams** (no polling or cron jobs).
-- Computes rolling window features aligned with prediction horizon.
-- Window size formula: `w = (H × 60) / Δ` where H = horizon (min), Δ = sampling interval (sec).
-- Outputs stored in **FeatureStore** table.
-
-#### Stage 4: ML Inference & Alerting
-- Gradient Boosting classifier deployed via **AWS Lambda** or **SageMaker endpoint**.
-- Multi-horizon prediction at **H = 5, 10, 15 minutes**.
-- Per-KPI calibrated alert thresholds (training-data quantile method).
-- Alert grouping: related warnings aggregated into incident records.
-- Notifications via **Amazon SNS**.
-
-#### Stage 5: Dashboard
-- Static frontend hosted on **Amazon S3**.
-- Connected to backend via **Amazon API Gateway** (REST).
-- Displays: real-time data streams, active alerts, incident history, model performance metrics.
-
----
-
-## 4. Data Model (DynamoDB)
-
-### 4.1 Table Schema
-
-| Table | Partition Key | Sort Key | Purpose |
+| Table | Partition Key | Sort Key | What It Stores |
 |---|---|---|---|
-| `KPIMetrics` | `service_id` | `timestamp` | Raw KPI time-series values |
-| `ServiceLogs` | `service_id` | `timestamp` | Variable-schema log documents per service type |
-| `FeatureStore` | `service_id` | `timestamp` | Computed feature vectors (8 features per record) |
-| `Alerts` | `alert_id` | `timestamp` | Individual alert records with confidence scores |
-| `Incidents` | `incident_id` | `created_at` | Grouped incidents with affected services, remarks |
+| KPIMetrics | service_id | timestamp | Raw metrics from each service (variable schema) |
+| ServiceLogs | service_id | timestamp | Event logs with different fields per service type |
+| FeatureStore | service_id | timestamp | 8 computed features per timestep |
+| Alerts | alert_id | timestamp | Predictions that crossed the threshold |
+| Incidents | incident_id | created_at | Grouped alerts with operator remarks |
+| SimConfig | config_key | — | Simulation tick counter, active scenario, running state |
 
-### 4.2 Why DynamoDB
-
-- **Schema flexibility** — each service type has a different log structure (response times vs. connection counts vs. MFA flags). A document model avoids wide sparse tables or per-service relational tables.
-- **Time-series writes** — horizontal scalability handles high-frequency ingestion.
-- **TTL** — automatic expiration of old metrics without manual cleanup.
-- **Streams** — native change-data-capture triggers the feature engineering pipeline.
+**Why DynamoDB:** Each service type has a completely different log structure. A relational DB would need many nullable columns or separate tables. DynamoDB stores each record as a flexible JSON document in one table.
 
 ---
 
-## 5. Machine Learning Component
+## 8. Backend (Lambda Functions)
 
-### 5.1 Dataset
+All backend code is Python, deployed as Lambda functions.
 
-**AIOps KPI Anomaly Detection Dataset** (2018 AIOps Challenge):
-- 2.4 million timesteps across 26 cloud service KPI metrics.
-- Expert-annotated binary anomaly labels.
-- Six real-world KPI series from large-scale production systems.
-- Sampling intervals vary per KPI (typically every minute).
+### Scheduled Lambda (triggered by EventBridge)
 
-### 5.2 Problem Formulation
+| Trigger | Lambda | What It Does |
+|---|---|---|
+| EventBridge (every 1 min) | Simulator | Generates fake KPI + logs for 5 services, writes to DynamoDB |
 
-Incident detection is framed as a **horizon-aware supervised learning task**:
+### Stream-Triggered Lambdas (triggered by DynamoDB Streams)
 
-Given KPI observations up to time *t*, predict whether an incident will begin within the next *h* minutes.
+| Trigger | Lambda | What It Does |
+|---|---|---|
+| New record in KPIMetrics | Feature Engineering | Computes 8 rolling features, writes to FeatureStore |
+| New record in FeatureStore | Inference | Runs model, writes alerts if threshold exceeded |
 
-Forward-looking label:
+### API-Facing Lambdas (triggered by API Gateway)
+
+| Endpoint | Lambda | What It Does |
+|---|---|---|
+| POST /start | Start Simulation | Resets tick counter, enables EventBridge rule, begins new scenario |
+| POST /stop | Stop Simulation | Disables EventBridge rule, stops data generation |
+| GET /metrics | Metrics | Queries KPIMetrics, returns time-series for live charts |
+| GET /alerts | Alerts | Returns active/historical alerts with scores |
+| PATCH /alerts/{id} | Alert Update | Acknowledge or dismiss an alert |
+| GET /incidents | Incidents | Returns grouped incidents |
+| GET /analytics | Analytics | Returns model performance stats |
+
+---
+
+## 9. Frontend (Dashboard)
+
+Built with **React + TypeScript + Vite**, hosted on **S3** as a static website. Uses **Recharts** for visualizations. Polls the backend every 3–5 seconds for live updates.
+
+### Page 1: Live Controls
+
+- **Start Simulation** / **Stop Simulation** buttons
+- Scenario selector dropdown (pick which incident scenario to run)
+- Live status indicator: running / stopped
+- Elapsed time and current simulation phase
+- Summary cards: services monitored, records generated, active alerts
+
+### Page 2: KPI Timeline (live scrolling)
+
+- Time-series line chart that scrolls forward as new data arrives
+- One line per service (or tabbed per service)
+- Incident regions shaded in red as they occur
+- Prediction score overlay with threshold line
+- Dropdown to switch horizons (5/10/15 min)
+
+### Page 3: Alerts & Incidents
+
+- Alerts table: timestamp, service, horizon, confidence, status
+- Color-coded severity badges
+- Incident groups: related alerts clustered with a timeline bar showing lead time
+- Acknowledge/dismiss buttons
+
+### Page 4: Model Analytics
+
+- **Precision vs Detection Rate** scatter plot (GBC vs baselines)
+- **Lead Time Distribution** box plot across horizons
+- **Feature Importance** bar chart showing which features matter most
+- Summary cards: precision, mean lead time, false alarm rate
+
+---
+
+## 10. ML Model Summary
+
+**Training data:** AIOps KPI dataset — 2.4M timesteps across 26 cloud service metrics.
+
+**Model:** Gradient Boosting Classifier (100 trees, depth 3, learning rate 0.1).
+
+**How it predicts:** Given the past H minutes of a KPI, predict whether an incident will start in the next H minutes. Three horizons: 5, 10, 15 minutes.
+
+**Alert calibration:** Each service gets its own threshold, tuned so that at most 1 false alert fires per 24 hours. Thresholds are set from training data and frozen for testing.
+
+**Best result:** GBC with KPI+Log-proxy features at H=15 → precision 0.91, mean lead time ~36 minutes.
+
+---
+
+## 11. Deployment
+
+Everything is serverless and deployed to AWS:
 
 ```
-y_t^(h) = 1  if ∃ t' ∈ [t, t+h] such that label(t') = 1
-         0  otherwise
+S3 Bucket A  →  React build files (npm run build → dist/ → upload)
+S3 Bucket B  →  trained_model.pkl + scenario_config.json
+Lambda       →  ~9 Python functions (the entire backend)
+EventBridge  →  Triggers Simulator Lambda every 1 minute
+API Gateway  →  REST routes pointing to each Lambda
+DynamoDB     →  6 tables (5 data + 1 config) with Streams enabled
 ```
 
-Three independent horizons: **h ∈ {5, 10, 15}** minutes.
+To access the app, anyone opens the S3 URL in their browser. No local setup needed.
 
-### 5.3 Feature Engineering
+**CORS:** API Gateway must allow requests from the S3 domain.
 
-**KPI Statistical Features (5):**
+**Lambda Layers:** scikit-learn, numpy, pandas packaged as a Lambda Layer shared across functions.
 
-| Feature | Description |
-|---|---|
-| `roll_mean` | Rolling mean within window |
-| `roll_max` | Rolling maximum within window |
-| `roll_std` | Rolling standard deviation (ddof=0) |
-| `roll_slope` | OLS slope within window |
-| `first_diff` | First difference of KPI values |
+**Free Tier Usage:** ~43,200 Lambda invocations/month for the simulator (1/min × 30 days) — well within the 1M free tier limit.
 
-**Log-Proxy Features (3):**
+---
 
-| Feature | Description |
-|---|---|
-| `error_rate` | Fraction of timesteps with |z-score| > 3 |
-| `warn_rate` | Large jumps exceeding 2× rolling std dev |
-| `severity_change_flag` | Activates when either rate shifts >50% vs. previous window |
+## 12. Demo Flow
 
-Total: **8 features** per KPI per timestep (KPI+Logs configuration).
+This is how we'd present the project:
 
-### 5.4 Models Trained
+1. Open the dashboard URL in a browser
+2. Select a scenario (e.g., "Web API Degradation")
+3. Click **Start Simulation**
+4. Watch the KPI Timeline — all services show normal behavior
+5. After a few minutes, Web API response times start creeping up
+6. The prediction score rises on the chart
+7. An alert fires — the Alerts panel highlights it with a confidence score
+8. The incident fully develops — dashboard shades the region red
+9. Recovery begins — metrics trend back down
+10. Switch to Model Analytics to show precision, lead time, feature importance
+11. Click **Stop Simulation**
 
-18 models total (3 horizons × 2 feature sets × 3 classifiers):
+Total demo time: ~10–15 minutes.
 
-| Classifier | Config |
-|---|---|
-| Gradient Boosting (GBC) | 100 trees, depth 3, learning rate 0.1 |
-| Random Forest (RF) | 100 trees, depth 3 |
-| Logistic Regression (LR) | max 1000 iterations |
+---
 
-All models trained on pooled data from 26 KPIs with per-KPI z-score normalization (train stats frozen, applied to test).
+## 13. Security Notes
 
-### 5.5 Alert Threshold Calibration
+In this prototype, all data is synthetic — no real user data or PII. In a production deployment:
 
-- Target: ≤1 false alert per KPI per 24 hours.
-- Target FPR: `1 / (24 × 3600 / Δ)` where Δ = sampling interval.
-- Threshold set to `(1 - FPR_target)` quantile of normal training scores.
-- Per-KPI calibration (score distributions vary across services).
-- Thresholds fixed during testing — no data leakage.
+- Data encrypted in transit (HTTPS via API Gateway) and at rest (DynamoDB default encryption)
+- Access controlled via IAM policies
+- S3 buckets private (no public access except the frontend bucket)
+- Real logs would need anonymization before ingestion
+- TTL on DynamoDB tables auto-deletes old records
 
-### 5.6 Evaluation Framework
+---
 
-**Dual-window approach:**
+## 14. Known Limitations
 
-| Window | Range | Purpose |
+- **Synthetic log features** — log-proxy features are derived from KPI values, not actual logs
+- **Low recall** — model detects ~7–9% of incidents, but precision is prioritized for trustworthiness
+- **One metric per service** — model doesn't correlate across services for cascading failures
+- **No hyperparameter tuning** — fixed model configs; tuning could improve results
+- **Simulated data** — the simulator produces controlled scenarios, not real production traffic
+
+---
+
+## 15. Project Timeline
+
+| Phase | What | When |
 |---|---|---|
-| Strict | `[T−H, T)` | Tests genuine anticipatory behavior within trained horizon |
-| Operational | `[T−60min, T)` | Reflects real deployment — any warning within past hour counts |
-
-**Lead time** = `(T − t_alert) / 60` in minutes, where T = incident onset, t_alert = earliest alert in window.
-
----
-
-## 6. AWS Infrastructure
-
-All services operate within **AWS Free Tier** limits.
-
-| Service | Free Tier Limit | Role |
-|---|---|---|
-| Amazon DynamoDB | 25 GB, 25 RCU/WCU | Primary NoSQL database for all tables |
-| AWS Lambda | 1M requests/month | Data intake, feature computation, ML inference |
-| Amazon API Gateway | 1M calls/month | REST API connecting dashboard to backend |
-| Amazon S3 | 5 GB | Model artifacts + static frontend hosting |
-| Amazon SageMaker | 250 hrs t2.medium | Model training + optional endpoint hosting |
-| Amazon SNS | 1M publishes/month | Alert notifications to operators |
-| DynamoDB Streams | Included | Triggers feature engineering on new data |
-
----
-
-## 7. Dashboard Requirements
-
-### 7.1 Views
-
-1. **Real-Time Stream** — live KPI values per service with anomaly highlighting.
-2. **Active Alerts** — current alerts with confidence scores, horizon, affected service.
-3. **Incident History** — grouped incidents with timeline, affected services, resolution status, operator remarks.
-4. **Model Performance** — precision, recall, lead time distributions, false alarm rates per KPI.
-
-### 7.2 Interactions
-
-- Filter by service type, time range, alert severity.
-- Acknowledge/dismiss alerts.
-- Add operator remarks to incidents.
-- Toggle prediction horizon (5 / 10 / 15 min).
-
----
-
-## 8. Key Design Decisions
-
-| Decision | Rationale |
-|---|---|
-| DynamoDB over relational DB | Variable log schemas per service; high-frequency time-series writes; TTL; Streams for event-driven pipeline |
-| Lambda over EC2 | Event-driven, intermittent workload; no need for always-on compute |
-| Gradient Boosting over deep learning | Competitive performance with simpler deployment; interpretable feature importance; lightweight for Lambda inference |
-| Log-proxy features over raw logs | Dataset lacks raw logs; synthetic proxies (error rate, warn rate, severity change) demonstrably improve precision from 0.63 → 0.91 |
-| Per-KPI threshold calibration | Score distributions differ across services; uniform threshold would be suboptimal |
-| Dual-window evaluation | Strict window validates genuine prediction; operational window validates practical usefulness |
-
----
-
-## 9. Known Limitations
-
-1. **Synthetic log-proxy features** — the AIOps dataset does not contain raw logs, so log features are derived from KPI behavior. Real log data would likely improve detection.
-2. **Degenerate windows** — six KPIs sampled every 300 seconds at H=5 reduce to single-timestep windows, producing degenerate rolling statistics.
-3. **Low recall** — the best configuration detects 6.88–9.06% of incidents under the operational window. Precision is prioritized to keep alerts trustworthy.
-4. **Fixed hyperparameters** — no hyperparameter search was performed. Tuning could improve results.
-5. **Single-KPI prediction** — the model predicts per-KPI independently. Cross-service correlation modeling could capture cascading failures.
-
----
-
-## 10. Future Work
-
-- Integrate **real log data** and additional observability signals (traces, topology).
-- Implement **cross-service correlation** for cascading failure detection.
-- Explore **attention-based or transformer models** for longer-horizon prediction.
-- Add **root cause analysis** to accompany alerts with probable failure source.
-- Conduct **hyperparameter optimization** and model selection on a validation set.
-- Evaluate on **live production data** beyond the AIOps benchmark dataset.
-
----
-
-## 11. Project Timeline
-
-| Phase | Deliverable | Target |
-|---|---|---|
-| Phase 1 | Data simulator + DynamoDB schema + ingestion pipeline | Week 3–4 |
-| Phase 2 | Feature engineering pipeline + FeatureStore | Week 5–6 |
-| Phase 3 | ML model training + threshold calibration + Lambda deployment | Week 7–8 |
-| Phase 4 | Dashboard + API Gateway + SNS integration | Week 9–10 |
-| Phase 5 | End-to-end testing + evaluation + final report | Week 11–12 |
-
----
-
-## 12. References
-
-- Li, Z. et al. (2022). Constructing large-scale real-world benchmark datasets for AIOps. *arXiv:2208.03938*.
-- Notaro, P. et al. (2021). A survey of AIOps methods for failure management. *ACM TOIT*.
-- Soldani, J. & Brogi, A. (2022). Anomaly detection and failure root cause analysis in (micro)service-based cloud applications. *ACM Computing Surveys*.
-- Full reference list available in the accompanying research paper.
+| 1 | Simulator Lambda + DynamoDB tables + EventBridge setup | Week 3–4 |
+| 2 | Feature engineering Lambda + FeatureStore | Week 5–6 |
+| 3 | ML model deployment + inference Lambda + alert calibration | Week 7–8 |
+| 4 | React dashboard + API Gateway + live polling | Week 9–10 |
+| 5 | End-to-end testing + demo scenarios + final report | Week 11–12 |
