@@ -1,4 +1,4 @@
-import type { ServiceInfo } from '../data/mockData';
+import type { ServiceInfo } from '../data/types';
 
 const statusColors: Record<string, string> = {
   healthy: 'border-healthy',
