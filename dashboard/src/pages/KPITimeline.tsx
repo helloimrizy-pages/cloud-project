@@ -70,7 +70,13 @@ export default function KPITimeline() {
   }, [isAllView, kpiLoading, services, kpiData]);
 
   if (svcLoading || threshLoading) {
-    return <div className="text-text-muted p-8">Loading timeline...</div>;
+    return (
+      <div className="space-y-8 animate-pulse">
+        <div className="h-7 w-40 bg-bg-card rounded-lg" />
+        <div className="h-10 w-full bg-bg-card rounded-xl" />
+        <div className="h-72 bg-bg-card rounded-xl" />
+      </div>
+    );
   }
 
   if (!services || !rawThresholds) return null;
@@ -80,16 +86,19 @@ export default function KPITimeline() {
   const threshold = rawThresholds[String(horizon)];
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-xl font-bold">KPI Timeline</h2>
+    <div className="space-y-8">
+      <div>
+        <h2 className="text-xl font-semibold tracking-tight">KPI Timeline</h2>
+        <p className="text-sm text-text-muted mt-1">Real-time service metrics and prediction scores</p>
+      </div>
 
       {/* Service Tabs */}
-      <div className="flex gap-1 bg-bg-card rounded-lg p-1 border border-border">
+      <div className="flex gap-1 bg-bg-card rounded-xl p-1 border border-border">
         {services.map(svc => (
           <button
             key={svc.id}
             onClick={() => setSelectedService(svc.id)}
-            className={`px-4 py-2 rounded text-sm transition-colors ${
+            className={`px-4 py-1.5 rounded-lg text-sm transition-all duration-150 ${
               selectedService === svc.id
                 ? 'text-white font-medium'
                 : 'text-text-secondary hover:text-text-primary'
@@ -135,7 +144,7 @@ export default function KPITimeline() {
       ) : (
         <>
           {/* KPI Value Chart */}
-          <div className="bg-bg-card border border-border rounded-lg p-4">
+          <div className="bg-bg-card border border-border rounded-xl p-4">
             <h3 className="text-sm font-semibold text-text-secondary mb-3">
               {isAllView ? 'All Services — KPI Values' : `${service?.name ?? ''} — ${service?.metricName ?? ''} (${service?.metricUnit ?? ''})`}
             </h3>
@@ -176,7 +185,7 @@ export default function KPITimeline() {
           </div>
 
           {/* Prediction Score Chart */}
-          <div className="bg-bg-card border border-border rounded-lg p-4">
+          <div className="bg-bg-card border border-border rounded-xl p-4">
             <h3 className="text-sm font-semibold text-text-secondary mb-3">
               {isAllView ? 'All Services — Prediction Scores' : `${service?.name ?? ''} — Prediction Score`}
             </h3>

@@ -17,7 +17,17 @@ export default function Analytics() {
   const { data: leadTimeDistributions, loading: leadTimesLoading } = useApi(() => api.getLeadTimes());
 
   if (summaryLoading || methodsLoading || featuresLoading || leadTimesLoading) {
-    return <div className="text-text-muted p-8">Loading analytics...</div>;
+    return (
+      <div className="space-y-8 animate-pulse">
+        <div className="h-7 w-48 bg-bg-card rounded-lg" />
+        <div className="grid grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => <div key={i} className="h-24 bg-bg-card rounded-xl" />)}
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          {[...Array(2)].map((_, i) => <div key={i} className="h-72 bg-bg-card rounded-xl" />)}
+        </div>
+      </div>
+    );
   }
 
   const statCards = summaryStats ? [
@@ -52,16 +62,19 @@ export default function Analytics() {
   }));
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-xl font-bold">Model Analytics</h2>
+    <div className="space-y-8">
+      <div>
+        <h2 className="text-xl font-semibold tracking-tight">Model Analytics</h2>
+        <p className="text-sm text-text-muted mt-1">Performance metrics and feature analysis</p>
+      </div>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-4 gap-4">
         {statCards.map(card => (
-          <div key={card.label} className="bg-bg-card border border-border rounded-lg p-4">
-            <p className="text-xs text-text-muted mb-1">{card.label}</p>
-            <p className="text-2xl font-bold text-accent">{card.value}</p>
-            <p className="text-xs text-text-secondary mt-1">{card.sub}</p>
+          <div key={card.label} className="bg-bg-card border border-border rounded-xl p-4">
+            <p className="text-[11px] text-text-muted uppercase tracking-wider mb-1.5">{card.label}</p>
+            <p className="text-2xl font-semibold text-accent font-mono tracking-tight">{card.value}</p>
+            <p className="text-[11px] text-text-secondary mt-1">{card.sub}</p>
           </div>
         ))}
       </div>
@@ -70,7 +83,7 @@ export default function Analytics() {
       <div className="grid grid-cols-2 gap-4">
 
         {/* Precision vs Detection Rate */}
-        <div className="bg-bg-card border border-border rounded-lg p-4">
+        <div className="bg-bg-card border border-border rounded-xl p-4">
           <h3 className="text-sm font-semibold text-text-secondary mb-3">Precision vs Detection Rate</h3>
           <ResponsiveContainer width="100%" height={300}>
             <ScatterChart margin={{ top: 10, right: 20, bottom: 10, left: 10 }}>
@@ -93,7 +106,7 @@ export default function Analytics() {
         </div>
 
         {/* Lead Time Distribution */}
-        <div className="bg-bg-card border border-border rounded-lg p-4">
+        <div className="bg-bg-card border border-border rounded-xl p-4">
           <h3 className="text-sm font-semibold text-text-secondary mb-3">Lead Time Distribution (GBC + Logs)</h3>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={leadTimeBarData} margin={{ top: 10, right: 20, bottom: 10, left: 10 }}>
@@ -128,7 +141,7 @@ export default function Analytics() {
         </div>
 
         {/* Feature Importance */}
-        <div className="bg-bg-card border border-border rounded-lg p-4 col-span-2">
+        <div className="bg-bg-card border border-border rounded-xl p-4 col-span-2">
           <h3 className="text-sm font-semibold text-text-secondary mb-1">Feature Importance (H=15, GBC + Logs)</h3>
           <div className="flex gap-4 mb-3">
             <div className="flex items-center gap-1.5 text-xs text-text-secondary">

@@ -4,20 +4,20 @@ import { useApi } from '../hooks/useApi';
 import { api } from '../lib/api';
 
 const severityColors: Record<string, { border: string; bg: string; text: string }> = {
-  CRITICAL: { border: 'border-danger', bg: 'bg-danger/10', text: 'text-danger' },
-  WARNING: { border: 'border-warning', bg: 'bg-warning/10', text: 'text-warning' },
-  INFO: { border: 'border-info', bg: 'bg-info/10', text: 'text-info' },
+  CRITICAL: { border: 'border-danger/40', bg: 'bg-danger/15', text: 'text-danger' },
+  WARNING: { border: 'border-warning/40', bg: 'bg-warning/15', text: 'text-warning' },
+  INFO: { border: 'border-info/40', bg: 'bg-info/15', text: 'text-info' },
 };
 
 function AlertCard({ alert, onAcknowledge, onDismiss }: { alert: Alert; onAcknowledge?: () => void; onDismiss?: () => void }) {
   const colors = severityColors[alert.severity];
   return (
-    <div className={`bg-bg-card border-l-4 ${colors.border} rounded-lg p-4`}>
+    <div className={`bg-bg-card border border-border border-l-[3px] ${colors.border} rounded-xl p-4 hover:bg-bg-active/30 transition-all duration-150`}>
       <div className="flex items-start justify-between mb-2">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="text-sm font-semibold text-text-primary">{alert.serviceName}</span>
-            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${colors.bg} ${colors.text}`}>
+            <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium uppercase tracking-wider ${colors.bg} ${colors.text}`}>
               {alert.severity}
             </span>
           </div>
@@ -47,10 +47,10 @@ function AlertCard({ alert, onAcknowledge, onDismiss }: { alert: Alert; onAcknow
         <span className="text-xs text-text-muted">Fired at {alert.firedAt}</span>
         {!alert.acknowledged && onAcknowledge && onDismiss && (
           <div className="flex gap-2">
-            <button onClick={onAcknowledge} className="text-xs px-3 py-1 rounded border border-accent text-accent hover:bg-accent/10 transition-colors">
+            <button onClick={onAcknowledge} className="text-[11px] px-3 py-1 rounded-lg border border-accent/30 text-accent hover:bg-accent/10 transition-all duration-150 active:scale-[0.97]">
               Acknowledge
             </button>
-            <button onClick={onDismiss} className="text-xs px-3 py-1 rounded border border-border text-text-muted hover:border-danger hover:text-danger transition-colors">
+            <button onClick={onDismiss} className="text-[11px] px-3 py-1 rounded-lg border border-border text-text-muted hover:border-danger/40 hover:text-danger transition-all duration-150 active:scale-[0.97]">
               Dismiss
             </button>
           </div>
@@ -73,7 +73,14 @@ export default function Alerts() {
   const [showHistory, setShowHistory] = useState(false);
 
   if (alertsLoading || historyLoading || incidentsLoading) {
-    return <div className="text-text-muted p-8">Loading alerts...</div>;
+    return (
+      <div className="space-y-8 animate-pulse">
+        <div className="h-7 w-48 bg-bg-card rounded-lg" />
+        <div className="space-y-3">
+          {[...Array(2)].map((_, i) => <div key={i} className="h-32 bg-bg-card rounded-xl" />)}
+        </div>
+      </div>
+    );
   }
 
   const activeAlerts = (fetchedAlerts ?? [])
@@ -96,12 +103,15 @@ export default function Alerts() {
   const incident = incidents?.[0];
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-xl font-bold">Alerts & Incidents</h2>
+    <div className="space-y-8">
+      <div>
+        <h2 className="text-xl font-semibold tracking-tight">Alerts & Incidents</h2>
+        <p className="text-sm text-text-muted mt-1">Monitor predictive alerts and incident timelines</p>
+      </div>
 
       {/* Active Alerts */}
       <div>
-        <h3 className="text-sm font-semibold text-text-secondary mb-3">
+        <h3 className="text-sm font-medium text-text-secondary mb-3">
           Active Alerts ({activeAlerts.filter(a => !a.acknowledged).length})
         </h3>
         <div className="space-y-3">
@@ -122,8 +132,8 @@ export default function Alerts() {
       {/* Incident Groups */}
       {incident && (
         <div>
-          <h3 className="text-sm font-semibold text-text-secondary mb-3">Incident Groups</h3>
-          <div className="bg-bg-card border border-border rounded-lg p-4">
+          <h3 className="text-sm font-medium text-text-secondary mb-3">Incident Groups</h3>
+          <div className="bg-bg-card border border-border rounded-xl p-4">
             <div className="flex items-center justify-between mb-3">
               <div>
                 <span className="text-xs text-text-muted">{incident.id}</span>
@@ -137,7 +147,7 @@ export default function Alerts() {
             {/* Timeline Bar */}
             <div className="mb-3">
               {(() => {
-                const totalSpan = Math.max(...incident.phases.map(p => p.end));
+                const totalSpan = incident.phases.length > 0 ? Math.max(...incident.phases.map(p => p.end)) : 1;
                 return (
                   <>
                     <div className="flex rounded-full overflow-hidden h-6">
