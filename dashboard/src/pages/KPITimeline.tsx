@@ -5,7 +5,9 @@ import {
 } from 'recharts';
 import type { KPIDataPoint } from '../data/types';
 import { useApi } from '../hooks/useApi';
+import { useTheme } from '../hooks/useTheme';
 import { api } from '../lib/api';
+import { chartColors } from '../lib/chartColors';
 
 const serviceColors: Record<string, string> = {
   'web-api-001': '#e74c3c',
@@ -18,6 +20,9 @@ const serviceColors: Record<string, string> = {
 };
 
 export default function KPITimeline() {
+  useTheme(); // subscribe to theme changes so chartColors() reads fresh CSS vars
+  const c = chartColors();
+
   const { data: services, loading: svcLoading } = useApi(() => api.getServices());
   const { data: rawThresholds, loading: threshLoading } = useApi(() => api.getThresholds());
 
@@ -136,17 +141,18 @@ export default function KPITimeline() {
             </h3>
             <ResponsiveContainer width="100%" height={280}>
               <LineChart data={(isAllView ? allData : data) as Record<string, unknown>[]}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#2a2a4a" />
-                <XAxis dataKey="timestamp" stroke="#4a4a6a" tick={{ fontSize: 12 }} />
-                <YAxis stroke="#4a4a6a" tick={{ fontSize: 12 }} />
+                <CartesianGrid strokeDasharray="3 3" stroke={c.grid} />
+                <XAxis dataKey="timestamp" stroke={c.axis} tick={{ fontSize: 12 }} />
+                <YAxis stroke={c.axis} tick={{ fontSize: 12 }} />
                 <Tooltip
-                  contentStyle={{ backgroundColor: '#1a1a2e', border: '1px solid #2a2a4a', borderRadius: 8 }}
-                  labelStyle={{ color: '#8892b0' }}
+                  contentStyle={{ backgroundColor: c.tooltipBg, border: `1px solid ${c.tooltipBorder}`, borderRadius: 8, boxShadow: c.tooltipShadow }}
+                  labelStyle={{ color: c.textPrimary }}
+                  itemStyle={{ color: c.textPrimary }}
                 />
                 {!isAllView && data.length > 12 && (
                   <>
-                    <ReferenceArea x1={data[4]?.timestamp} x2={data[7]?.timestamp} fill="#f39c12" fillOpacity={0.1} />
-                    <ReferenceArea x1={data[7]?.timestamp} x2={data[12]?.timestamp} fill="#e74c3c" fillOpacity={0.1} />
+                    <ReferenceArea x1={data[4]?.timestamp} x2={data[7]?.timestamp} fill={c.warning} fillOpacity={0.1} />
+                    <ReferenceArea x1={data[7]?.timestamp} x2={data[12]?.timestamp} fill={c.danger} fillOpacity={0.1} />
                   </>
                 )}
                 {isAllView ? (
@@ -176,17 +182,18 @@ export default function KPITimeline() {
             </h3>
             <ResponsiveContainer width="100%" height={250}>
               <LineChart data={(isAllView ? allData : data) as Record<string, unknown>[]}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#2a2a4a" />
-                <XAxis dataKey="timestamp" stroke="#4a4a6a" tick={{ fontSize: 12 }} />
-                <YAxis domain={[0, 1]} stroke="#4a4a6a" tick={{ fontSize: 12 }} />
+                <CartesianGrid strokeDasharray="3 3" stroke={c.grid} />
+                <XAxis dataKey="timestamp" stroke={c.axis} tick={{ fontSize: 12 }} />
+                <YAxis domain={[0, 1]} stroke={c.axis} tick={{ fontSize: 12 }} />
                 <Tooltip
-                  contentStyle={{ backgroundColor: '#1a1a2e', border: '1px solid #2a2a4a', borderRadius: 8 }}
-                  labelStyle={{ color: '#8892b0' }}
+                  contentStyle={{ backgroundColor: c.tooltipBg, border: `1px solid ${c.tooltipBorder}`, borderRadius: 8, boxShadow: c.tooltipShadow }}
+                  labelStyle={{ color: c.textPrimary }}
+                  itemStyle={{ color: c.textPrimary }}
                 />
                 {threshold != null && (
-                  <ReferenceLine y={threshold} stroke="#e74c3c" strokeDasharray="5 5" label={{ value: `Threshold (${threshold})`, fill: '#e74c3c', fontSize: 11, position: 'right' }} />
+                  <ReferenceLine y={threshold} stroke={c.danger} strokeDasharray="5 5" label={{ value: `Threshold (${threshold})`, fill: c.danger, fontSize: 11, position: 'right' }} />
                 )}
-                <ReferenceLine y={0.5} stroke="#4a4a6a" strokeDasharray="3 3" label={{ value: 'p=0.5', fill: '#4a4a6a', fontSize: 11, position: 'right' }} />
+                <ReferenceLine y={0.5} stroke={c.axis} strokeDasharray="3 3" label={{ value: 'p=0.5', fill: c.axis, fontSize: 11, position: 'right' }} />
                 {isAllView ? (
                   services.map(svc => (
                     <Line
@@ -200,7 +207,7 @@ export default function KPITimeline() {
                     />
                   ))
                 ) : (
-                  <Line type="monotone" dataKey="predictionScore" stroke="#64ffda" strokeWidth={2} dot={{ r: 3 }} />
+                  <Line type="monotone" dataKey="predictionScore" stroke={c.accent} strokeWidth={2} dot={{ r: 3 }} />
                 )}
                 {isAllView && <Legend />}
               </LineChart>

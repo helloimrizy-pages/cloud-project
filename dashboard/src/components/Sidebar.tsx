@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { useApi } from '../hooks/useApi';
+import { useTheme } from '../hooks/useTheme';
 import { api } from '../lib/api';
 
 const navItems = [
@@ -12,6 +13,7 @@ const navItems = [
 export default function Sidebar() {
   const { data: alerts } = useApi(() => api.getActiveAlerts());
   const { data: simState } = useApi(() => api.getSimulationState());
+  const { theme, toggleTheme } = useTheme();
 
   const activeAlertCount = alerts?.filter(a => !a.acknowledged).length ?? 0;
 
@@ -67,6 +69,17 @@ export default function Sidebar() {
         <div className="flex justify-between"><span>Services</span><span className="text-text-secondary">5</span></div>
         <div className="flex justify-between"><span>Active Alerts</span><span className="text-danger">{activeAlertCount}</span></div>
         <div className="flex justify-between"><span>Predictions</span><span className="text-text-secondary">{simState?.predictionsProcessed ?? '—'}</span></div>
+      </div>
+
+      {/* Theme Toggle */}
+      <div className="px-5 py-3 border-t border-border">
+        <button
+          onClick={toggleTheme}
+          className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-sm text-text-secondary hover:text-text-primary hover:bg-bg-active/50 transition-colors"
+        >
+          <span className="text-base">{theme === 'dark' ? '☀' : '☾'}</span>
+          <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+        </button>
       </div>
     </aside>
   );

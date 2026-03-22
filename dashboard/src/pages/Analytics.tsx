@@ -3,9 +3,14 @@ import {
   BarChart, Bar, Cell, ResponsiveContainer, Legend, ZAxis,
 } from 'recharts';
 import { useApi } from '../hooks/useApi';
+import { useTheme } from '../hooks/useTheme';
 import { api } from '../lib/api';
+import { chartColors } from '../lib/chartColors';
 
 export default function Analytics() {
+  useTheme(); // subscribe to theme changes so chartColors() reads fresh CSS vars
+  const c = chartColors();
+
   const { data: summaryStats, loading: summaryLoading } = useApi(() => api.getSummary());
   const { data: analyticsMethods, loading: methodsLoading } = useApi(() => api.getMethods());
   const { data: featureImportances, loading: featuresLoading } = useApi(() => api.getFeatures());
@@ -39,7 +44,6 @@ export default function Analytics() {
     median: d.median - d.q1,
     q3: d.q3 - d.median,
     max: d.max - d.q3,
-    // raw values for tooltip
     rawMin: d.min,
     rawQ1: d.q1,
     rawMedian: d.median,
@@ -70,13 +74,14 @@ export default function Analytics() {
           <h3 className="text-sm font-semibold text-text-secondary mb-3">Precision vs Detection Rate</h3>
           <ResponsiveContainer width="100%" height={300}>
             <ScatterChart margin={{ top: 10, right: 20, bottom: 10, left: 10 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#2a2a4a" />
-              <XAxis type="number" dataKey="detectionRate" name="Detection Rate" unit="%" stroke="#4a4a6a" tick={{ fontSize: 12 }} label={{ value: 'Detection Rate (%)', position: 'bottom', offset: -5, style: { fill: '#8892b0', fontSize: 11 } }} />
-              <YAxis type="number" dataKey="precision" name="Precision" domain={[0.3, 1]} stroke="#4a4a6a" tick={{ fontSize: 12 }} label={{ value: 'Precision', angle: -90, position: 'insideLeft', style: { fill: '#8892b0', fontSize: 11 } }} />
+              <CartesianGrid strokeDasharray="3 3" stroke={c.grid} />
+              <XAxis type="number" dataKey="detectionRate" name="Detection Rate" unit="%" stroke={c.axis} tick={{ fontSize: 12 }} label={{ value: 'Detection Rate (%)', position: 'bottom', offset: -5, style: { fill: c.labelFill, fontSize: 11 } }} />
+              <YAxis type="number" dataKey="precision" name="Precision" domain={[0.3, 1]} stroke={c.axis} tick={{ fontSize: 12 }} label={{ value: 'Precision', angle: -90, position: 'insideLeft', style: { fill: c.labelFill, fontSize: 11 } }} />
               <ZAxis range={[80, 80]} />
               <Tooltip
-                contentStyle={{ backgroundColor: '#1a1a2e', border: '1px solid #2a2a4a', borderRadius: 8 }}
-                labelStyle={{ color: '#8892b0' }}
+                contentStyle={{ backgroundColor: c.tooltipBg, border: `1px solid ${c.tooltipBorder}`, borderRadius: 8, boxShadow: c.tooltipShadow }}
+                labelStyle={{ color: c.textPrimary }}
+                itemStyle={{ color: c.textPrimary }}
                 formatter={(value: unknown, name: unknown) => [name === 'Precision' ? Number(value).toFixed(2) : `${value}%`, String(name)]}
               />
               <Legend />
@@ -92,27 +97,32 @@ export default function Analytics() {
           <h3 className="text-sm font-semibold text-text-secondary mb-3">Lead Time Distribution (GBC + Logs)</h3>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={leadTimeBarData} margin={{ top: 10, right: 20, bottom: 10, left: 10 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#2a2a4a" />
-              <XAxis dataKey="name" stroke="#4a4a6a" tick={{ fontSize: 12 }} />
-              <YAxis stroke="#4a4a6a" tick={{ fontSize: 12 }} label={{ value: 'Minutes', angle: -90, position: 'insideLeft', style: { fill: '#8892b0', fontSize: 11 } }} />
+              <CartesianGrid strokeDasharray="3 3" stroke={c.grid} />
+              <XAxis dataKey="name" stroke={c.axis} tick={{ fontSize: 12 }} />
+              <YAxis stroke={c.axis} tick={{ fontSize: 12 }} label={{ value: 'Minutes', angle: -90, position: 'insideLeft', style: { fill: c.labelFill, fontSize: 11 } }} />
               <Tooltip
-                contentStyle={{ backgroundColor: '#1a1a2e', border: '1px solid #2a2a4a', borderRadius: 8 }}
-                formatter={(_value: unknown, name: unknown, props: unknown) => {
-                  const p = (props as { payload: Record<string, number> }).payload;
-                  const n = String(name);
-                  if (n === 'min') return [`${p.rawMin}m`, 'Min'];
-                  if (n === 'q1') return [`${p.rawQ1}m`, 'Q1'];
-                  if (n === 'median') return [`${p.rawMedian}m`, 'Median'];
-                  if (n === 'q3') return [`${p.rawQ3}m`, 'Q3'];
-                  if (n === 'max') return [`${p.rawMax}m`, 'Max'];
-                  return [String(_value), n];
+                cursor={{ fill: c.info, fillOpacity: 0.06 }}
+                contentStyle={{ backgroundColor: c.tooltipBg, border: `1px solid ${c.tooltipBorder}`, borderRadius: 8, boxShadow: c.tooltipShadow }}
+                content={({ active, payload }) => {
+                  if (!active || !payload?.length) return null;
+                  const p = payload[0].payload as Record<string, number | string>;
+                  return (
+                    <div style={{ backgroundColor: c.tooltipBg, border: `1px solid ${c.tooltipBorder}`, borderRadius: 8, padding: '10px 14px', boxShadow: c.tooltipShadow }}>
+                      <p style={{ color: c.textPrimary, fontSize: 12, fontWeight: 600, margin: '0 0 6px' }}>{p.name}</p>
+                      <p style={{ color: c.labelFill, fontSize: 12, margin: 2 }}>Min: <span style={{ color: c.textPrimary }}>{p.rawMin}m</span></p>
+                      <p style={{ color: c.labelFill, fontSize: 12, margin: 2 }}>Q1: <span style={{ color: c.textPrimary }}>{p.rawQ1}m</span></p>
+                      <p style={{ color: c.labelFill, fontSize: 12, margin: 2, fontWeight: 600 }}>Median: <span style={{ color: c.info, fontWeight: 700 }}>{p.rawMedian}m</span></p>
+                      <p style={{ color: c.labelFill, fontSize: 12, margin: 2 }}>Q3: <span style={{ color: c.textPrimary }}>{p.rawQ3}m</span></p>
+                      <p style={{ color: c.labelFill, fontSize: 12, margin: 2 }}>Max: <span style={{ color: c.textPrimary }}>{p.rawMax}m</span></p>
+                    </div>
+                  );
                 }}
               />
-              <Bar dataKey="min" stackId="box" fill="#1a1a2e" />
-              <Bar dataKey="q1" stackId="box" fill="#3498db" fillOpacity={0.4} />
-              <Bar dataKey="median" stackId="box" fill="#3498db" fillOpacity={0.7} />
-              <Bar dataKey="q3" stackId="box" fill="#3498db" fillOpacity={0.4} />
-              <Bar dataKey="max" stackId="box" fill="#1a1a2e" stroke="#3498db" strokeWidth={1} />
+              <Bar dataKey="min" stackId="box" fill="transparent" />
+              <Bar dataKey="q1" stackId="box" fill={c.info} fillOpacity={0.4} />
+              <Bar dataKey="median" stackId="box" fill={c.info} fillOpacity={0.7} />
+              <Bar dataKey="q3" stackId="box" fill={c.info} fillOpacity={0.4} />
+              <Bar dataKey="max" stackId="box" fill="transparent" stroke={c.info} strokeWidth={1} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -132,16 +142,19 @@ export default function Analytics() {
           </div>
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={featureImportances ?? []} layout="vertical" margin={{ top: 5, right: 30, bottom: 5, left: 100 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#2a2a4a" horizontal={false} />
-              <XAxis type="number" stroke="#4a4a6a" tick={{ fontSize: 12 }} domain={[0, 0.35]} />
-              <YAxis type="category" dataKey="feature" stroke="#4a4a6a" tick={{ fontSize: 12 }} width={90} />
+              <CartesianGrid strokeDasharray="3 3" stroke={c.grid} horizontal={false} />
+              <XAxis type="number" stroke={c.axis} tick={{ fontSize: 12 }} domain={[0, 0.35]} />
+              <YAxis type="category" dataKey="feature" stroke={c.axis} tick={{ fontSize: 12 }} width={90} />
               <Tooltip
-                contentStyle={{ backgroundColor: '#1a1a2e', border: '1px solid #2a2a4a', borderRadius: 8 }}
+                cursor={{ fill: c.info, fillOpacity: 0.06 }}
+                contentStyle={{ backgroundColor: c.tooltipBg, border: `1px solid ${c.tooltipBorder}`, borderRadius: 8, boxShadow: c.tooltipShadow }}
+                labelStyle={{ color: c.textPrimary }}
+                itemStyle={{ color: c.textPrimary }}
                 formatter={(value: unknown) => [Number(value).toFixed(2), 'Importance']}
               />
               <Bar dataKey="importance" radius={[0, 4, 4, 0]}>
                 {(featureImportances ?? []).map((entry, index) => (
-                  <Cell key={index} fill={entry.type === 'kpi' ? '#3498db' : '#e74c3c'} />
+                  <Cell key={index} fill={entry.type === 'kpi' ? c.info : c.danger} />
                 ))}
               </Bar>
             </BarChart>
