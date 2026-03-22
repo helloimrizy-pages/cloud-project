@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { useApi } from '../hooks/useApi';
+import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../hooks/useTheme';
 import { api } from '../lib/api';
 
@@ -13,6 +14,7 @@ const navItems = [
 export default function Sidebar() {
   const { data: alerts } = useApi(() => api.getActiveAlerts());
   const { data: simState } = useApi(() => api.getSimulationState());
+  const { user, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
 
   const activeAlertCount = alerts?.filter(a => !a.acknowledged).length;
@@ -74,8 +76,19 @@ export default function Sidebar() {
         <div className="flex justify-between"><span>Predictions</span><span className="text-text-secondary font-mono">{simState?.predictionsProcessed ?? '—'}</span></div>
       </div>
 
-      {/* Theme Toggle */}
-      <div className="px-4 py-3 border-t border-border">
+      {/* User + Actions */}
+      <div className="px-4 py-3 border-t border-border space-y-1">
+        {user && (
+          <div className="flex items-center justify-between px-3 py-2">
+            <span className="text-[11px] text-text-muted truncate max-w-[120px]">{user.email}</span>
+            <button
+              onClick={signOut}
+              className="text-[11px] text-text-muted hover:text-danger transition-colors"
+            >
+              Sign out
+            </button>
+          </div>
+        )}
         <button
           onClick={toggleTheme}
           className="flex items-center justify-between w-full px-3 py-2 rounded-lg text-xs text-text-muted hover:text-text-secondary hover:bg-bg-active transition-all duration-150"

@@ -4,10 +4,23 @@ import type {
   SimulationState, SummaryStats,
 } from '../data/types';
 
+import { getIdToken } from './auth';
+
 const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '/api';
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${BASE_URL}${path}`, init);
+  const token = await getIdToken();
+  const res = await fetch(`${BASE_URL}${path}`, {
+    ...init,
+    headers: {
+      ...init?.headers,
+      ...(token ? { Authorization: token } : {}),
+    },
+  });
+  if (res.status === 401) {
+    window.location.href = '/login';
+    throw new Error('Session expired');
+  }
   if (!res.ok) throw new Error(`API ${res.status}: ${res.statusText}`);
   return res.json() as Promise<T>;
 }
