@@ -2,20 +2,27 @@ import {
   ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip,
   BarChart, Bar, Cell, ResponsiveContainer, Legend, ZAxis,
 } from 'recharts';
-import {
-  summaryStats, analyticsMethods, featureImportances, leadTimeDistributions,
-} from '../data/mockData';
-
-const statCards = [
-  { label: 'Best Precision', value: summaryStats.bestPrecision.toFixed(2), sub: 'GBC + Logs, H=15' },
-  { label: 'Mean Lead Time', value: `${summaryStats.meanLeadTime}m`, sub: 'H=15 horizon' },
-  { label: 'False Alarm Rate', value: summaryStats.falseAlarmRate, sub: 'Per day' },
-  { label: 'Detection Rate', value: `${summaryStats.detectionRate}%`, sub: 'GBC + Logs' },
-];
+import { useApi } from '../hooks/useApi';
+import { api } from '../lib/api';
 
 export default function Analytics() {
-  // Group scatter data by method for multiple Scatter components
-  const scatterByMethod = analyticsMethods.map(method => ({
+  const { data: summaryStats, loading: summaryLoading } = useApi(() => api.getSummary());
+  const { data: analyticsMethods, loading: methodsLoading } = useApi(() => api.getMethods());
+  const { data: featureImportances, loading: featuresLoading } = useApi(() => api.getFeatures());
+  const { data: leadTimeDistributions, loading: leadTimesLoading } = useApi(() => api.getLeadTimes());
+
+  if (summaryLoading || methodsLoading || featuresLoading || leadTimesLoading) {
+    return <div className="text-text-muted p-8">Loading analytics...</div>;
+  }
+
+  const statCards = summaryStats ? [
+    { label: 'Best Precision', value: summaryStats.bestPrecision.toFixed(2), sub: 'GBC + Logs, H=15' },
+    { label: 'Mean Lead Time', value: `${summaryStats.meanLeadTime}m`, sub: 'H=15 horizon' },
+    { label: 'False Alarm Rate', value: summaryStats.falseAlarmRate, sub: 'Per day' },
+    { label: 'Detection Rate', value: `${summaryStats.detectionRate}%`, sub: 'GBC + Logs' },
+  ] : [];
+
+  const scatterByMethod = (analyticsMethods ?? []).map(method => ({
     name: method.name,
     color: method.color,
     data: [5, 10, 15].map(h => ({
@@ -25,8 +32,7 @@ export default function Analytics() {
     })),
   }));
 
-  // Lead time box plot proxy: grouped bars
-  const leadTimeBarData = leadTimeDistributions.map(d => ({
+  const leadTimeBarData = (leadTimeDistributions ?? []).map(d => ({
     name: `H=${d.horizon}`,
     min: d.min,
     q1: d.q1 - d.min,
@@ -125,7 +131,7 @@ export default function Analytics() {
             </div>
           </div>
           <ResponsiveContainer width="100%" height={280}>
-            <BarChart data={featureImportances} layout="vertical" margin={{ top: 5, right: 30, bottom: 5, left: 100 }}>
+            <BarChart data={featureImportances ?? []} layout="vertical" margin={{ top: 5, right: 30, bottom: 5, left: 100 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#2a2a4a" horizontal={false} />
               <XAxis type="number" stroke="#4a4a6a" tick={{ fontSize: 12 }} domain={[0, 0.35]} />
               <YAxis type="category" dataKey="feature" stroke="#4a4a6a" tick={{ fontSize: 12 }} width={90} />
@@ -134,7 +140,7 @@ export default function Analytics() {
                 formatter={(value: unknown) => [Number(value).toFixed(2), 'Importance']}
               />
               <Bar dataKey="importance" radius={[0, 4, 4, 0]}>
-                {featureImportances.map((entry, index) => (
+                {(featureImportances ?? []).map((entry, index) => (
                   <Cell key={index} fill={entry.type === 'kpi' ? '#3498db' : '#e74c3c'} />
                 ))}
               </Bar>
