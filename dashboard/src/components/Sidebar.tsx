@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
-import { alerts } from '../data/mockData';
+import { useApi } from '../hooks/useApi';
+import { api } from '../lib/api';
 
 const navItems = [
   { to: '/', label: 'Live Controls', icon: '⊞' },
@@ -8,9 +9,12 @@ const navItems = [
   { to: '/analytics', label: 'Analytics', icon: '◈' },
 ];
 
-const activeAlertCount = alerts.filter(a => !a.acknowledged).length;
-
 export default function Sidebar() {
+  const { data: alerts } = useApi(() => api.getActiveAlerts());
+  const { data: simState } = useApi(() => api.getSimulationState());
+
+  const activeAlertCount = alerts?.filter(a => !a.acknowledged).length ?? 0;
+
   return (
     <aside className="w-60 h-screen bg-bg-card border-r border-border flex flex-col shrink-0">
       {/* Brand */}
@@ -22,10 +26,14 @@ export default function Sidebar() {
       {/* Simulation Status */}
       <div className="px-5 py-3 border-b border-border">
         <div className="flex items-center gap-2 text-sm">
-          <span className="w-2 h-2 rounded-full bg-healthy animate-pulse" />
-          <span className="text-healthy font-medium">Running</span>
+          <span className={`w-2 h-2 rounded-full ${simState?.status === 'running' ? 'bg-healthy animate-pulse' : 'bg-text-muted'}`} />
+          <span className={`font-medium ${simState?.status === 'running' ? 'text-healthy' : 'text-text-muted'}`}>
+            {simState?.status === 'running' ? 'Running' : 'Stopped'}
+          </span>
         </div>
-        <p className="text-xs text-text-muted mt-1">Tick 6 / 15 — Degrading</p>
+        <p className="text-xs text-text-muted mt-1">
+          {simState ? `Tick ${simState.tick} / ${simState.totalTicks} — ${simState.phase}` : '—'}
+        </p>
       </div>
 
       {/* Navigation */}
@@ -45,7 +53,7 @@ export default function Sidebar() {
           >
             <span className="text-base">{item.icon}</span>
             <span>{item.label}</span>
-            {item.label === 'Alerts' && activeAlertCount > 0 && (
+            {item.to === '/alerts' && activeAlertCount > 0 && (
               <span className="ml-auto bg-danger text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                 {activeAlertCount}
               </span>
@@ -58,7 +66,7 @@ export default function Sidebar() {
       <div className="px-5 py-4 border-t border-border text-xs text-text-muted space-y-1">
         <div className="flex justify-between"><span>Services</span><span className="text-text-secondary">5</span></div>
         <div className="flex justify-between"><span>Active Alerts</span><span className="text-danger">{activeAlertCount}</span></div>
-        <div className="flex justify-between"><span>Predictions</span><span className="text-text-secondary">42</span></div>
+        <div className="flex justify-between"><span>Predictions</span><span className="text-text-secondary">{simState?.predictionsProcessed ?? '—'}</span></div>
       </div>
     </aside>
   );
