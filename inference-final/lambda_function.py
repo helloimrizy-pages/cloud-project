@@ -58,7 +58,7 @@ def get_default_threshold(horizon):
 
 def determine_severity(score, threshold):
     ratio = score / threshold if threshold > 0 else 1.0
-    if ratio >= 1.1:
+    if ratio >= 1.03:
         return 'CRITICAL'
     elif ratio >= 1.0:
         return 'WARNING'
