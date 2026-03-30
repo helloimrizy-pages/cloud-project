@@ -9,7 +9,6 @@ dynamodb = boto3.resource('dynamodb')
 alerts_table = dynamodb.Table(os.environ.get('ALERTS_TABLE', 'Alerts'))
 incidents_table = dynamodb.Table(os.environ.get('INCIDENTS_TABLE', 'Incidents'))
 kpi_table = dynamodb.Table(os.environ.get('KPI_TABLE', 'KPIMetrics'))
-sim_table = dynamodb.Table(os.environ.get('SIM_TABLE', 'SimConfig'))
 
 BUCKET = os.environ.get('MODEL_BUCKET', 'cloud-project-dashboard1')
 HORIZONS = [5, 10, 15]
@@ -53,18 +52,6 @@ def load_thresholds():
     return _thresholds
 
 
-def get_sim_tick():
-    try:
-        resp = sim_table.get_item(Key={'config_key': 'simulation'})
-        item = resp.get('Item', {})
-        val = item.get('value', {})
-        if isinstance(val, str):
-            val = json.loads(val)
-        return int(val.get('tick', 0))
-    except Exception:
-        return 0
-
-
 def get_default_threshold(horizon):
     return {5: 0.912, 10: 0.867, 15: 0.847}.get(horizon, 0.85)
 
@@ -79,10 +66,10 @@ def determine_severity(score, threshold):
         return 'INFO'
 
 
-def update_kpi_prediction_score(service_id, timestamp, score):
+def update_kpi_prediction_score(owner_service, timestamp, score):
     try:
         kpi_table.update_item(
-            Key={'service_id': service_id, 'timestamp': timestamp},
+            Key={'owner_service': owner_service, 'timestamp': timestamp},
             UpdateExpression='SET predictionScore = :s',
             ExpressionAttributeValues={':s': Decimal(str(round(score, 4)))}
         )
@@ -90,13 +77,17 @@ def update_kpi_prediction_score(service_id, timestamp, score):
         print(f'Warning: could not update KPI score: {e}')
 
 
-def create_alert(service_id, timestamp, score, threshold, horizon, tick):
+def create_alert(owner_id, service_id, timestamp, score, threshold, horizon, tick):
     info = SERVICE_INFO.get(service_id, {'name': service_id, 'metric': 'metric'})
     alert_id = f'ALT-{uuid.uuid4().hex[:6].upper()}'
     severity = determine_severity(score, threshold)
+    now = timestamp
+    owner_status = f'{owner_id}#{severity}'
     alert_item = {
+        'owner_id': owner_id,
+        'created_at': now,
         'alert_id': alert_id,
-        'timestamp': timestamp,
+        'owner_status': owner_status,
         'service_id': service_id,
         'service_name': info['name'],
         'severity': severity,
@@ -115,27 +106,22 @@ def create_alert(service_id, timestamp, score, threshold, horizon, tick):
     return alert_item
 
 
-def try_group_into_incident(alert_item):
-    service_id = alert_item['service_id']
-    timestamp = alert_item['timestamp']
-    resp = alerts_table.scan(
-        FilterExpression='#s = :active AND #ts > :cutoff',
-        ExpressionAttributeNames={'#s': 'status', '#ts': 'timestamp'},
-        ExpressionAttributeValues={
-            ':active': 'active',
-            ':cutoff': timestamp[:16].replace(timestamp[13:16],
-                str(max(0, int(timestamp[14:16])-5)).zfill(2)),
-        }
+def try_group_into_incident(owner_id, alert_item):
+    timestamp = alert_item['created_at']
+    from boto3.dynamodb.conditions import Key, Attr
+    resp = alerts_table.query(
+        KeyConditionExpression=Key('owner_id').eq(owner_id),
+        FilterExpression=Attr('status').eq('active')
     )
     related_alerts = resp.get('Items', [])
     if len(related_alerts) >= 2:
         affected = list(set(a['service_id'] for a in related_alerts))
         affected_names = [SERVICE_INFO.get(s, {}).get('name', s) for s in affected]
         incident_id = f'INC-{uuid.uuid4().hex[:6].upper()}'
-        tick = int(alert_item.get('simulation_tick', 0))
         incident = {
-            'incident_id': incident_id,
+            'owner_id': owner_id,
             'created_at': timestamp,
+            'incident_id': incident_id,
             'title': f'{"/".join(affected_names)} Degradation',
             'affected_services': affected_names,
             'alert_ids': [a['alert_id'] for a in related_alerts],
@@ -151,15 +137,16 @@ def try_group_into_incident(alert_item):
 
 def handler(event, context):
     thresholds = load_thresholds()
-    tick = get_sim_tick()
     for record in event.get('Records', []):
         if record['eventName'] not in ('INSERT', 'MODIFY'):
             continue
         new_image = record['dynamodb'].get('NewImage', {})
+        owner_service = new_image.get('owner_service', {}).get('S', '')
         service_id = new_image.get('service_id', {}).get('S', '')
+        owner_id = new_image.get('owner_id', {}).get('S', '')
         timestamp = new_image.get('timestamp', {}).get('S', '')
         features_raw = new_image.get('features', {}).get('M', {})
-        if not service_id or not features_raw:
+        if not service_id or not features_raw or not owner_id:
             continue
         feature_vector = []
         for fname in FEATURE_ORDER:
@@ -173,7 +160,7 @@ def handler(event, context):
             threshold = get_default_threshold(H)
             best_score = max(best_score, score)
             if score > threshold:
-                alert = create_alert(service_id, timestamp, score, threshold, H, tick)
-                try_group_into_incident(alert)
-        update_kpi_prediction_score(service_id, timestamp, best_score)
+                alert = create_alert(owner_id, service_id, timestamp, score, threshold, H, 0)
+                try_group_into_incident(owner_id, alert)
+        update_kpi_prediction_score(owner_service, timestamp, best_score)
     return {'statusCode': 200}
