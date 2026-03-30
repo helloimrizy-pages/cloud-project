@@ -7,6 +7,7 @@ from boto3.dynamodb.conditions import Key
 
 dynamodb = boto3.resource("dynamodb")
 kpi_table = dynamodb.Table(os.environ["KPI_TABLE"])
+alerts_table = dynamodb.Table(os.environ.get("ALERTS_TABLE", "Alerts"))
 
 
 SERVICE_METADATA = {
@@ -87,7 +88,7 @@ def build_owner_service(owner_id, service_id):
     return f"{owner_id}#{service_id}"
 
 
-def derive_status(service_id, metric_value):
+def derive_status_from_metric(service_id, metric_value):
     if service_id == "web-api-001":
         return "critical" if metric_value >= 300 else "warning" if metric_value >= 200 else "healthy"
     if service_id == "db-pool-001":
@@ -98,8 +99,28 @@ def derive_status(service_id, metric_value):
         return "critical" if metric_value >= 140 else "warning" if metric_value >= 90 else "healthy"
     if service_id == "ml-pipeline-001":
         return "critical" if metric_value >= 180 else "warning" if metric_value >= 120 else "healthy"
-
     return "healthy"
+
+
+def get_active_alerts_for_owner(owner_id):
+    from boto3.dynamodb.conditions import Attr
+    resp = alerts_table.query(
+        KeyConditionExpression=Key("owner_id").eq(owner_id),
+        FilterExpression=Attr("status").eq("active") & Attr("acknowledged").eq(False),
+    )
+    return resp.get("Items", [])
+
+
+def derive_status(service_id, metric_value, active_alerts):
+    metric_status = derive_status_from_metric(service_id, metric_value)
+    for alert in active_alerts:
+        if alert.get("service_id") == service_id:
+            severity = alert.get("severity", "")
+            if severity == "CRITICAL":
+                return "critical"
+            if severity == "WARNING" and metric_status == "healthy":
+                metric_status = "warning"
+    return metric_status
 
 
 def get_latest_for_service(owner_id, service_id):
@@ -115,7 +136,7 @@ def get_latest_for_service(owner_id, service_id):
     return items[0] if items else None
 
 
-def build_service_card(service_id, item):
+def build_service_card(service_id, item, active_alerts):
     metadata = SERVICE_METADATA.get(service_id)
     if metadata is None or item is None:
         return None
@@ -127,7 +148,7 @@ def build_service_card(service_id, item):
         "id": service_id,
         "name": metadata["name"],
         "type": metadata["type"],
-        "status": derive_status(service_id, float(value)),
+        "status": derive_status(service_id, float(value), active_alerts),
         "metricName": metadata["metricName"],
         "metricUnit": metadata["metricUnit"],
         "currentValue": value,
@@ -136,10 +157,11 @@ def build_service_card(service_id, item):
 
 def fetch_services(owner_id):
     services = []
+    active_alerts = get_active_alerts_for_owner(owner_id)
 
     for service_id in SERVICE_METADATA.keys():
         latest_item = get_latest_for_service(owner_id, service_id)
-        card = build_service_card(service_id, latest_item)
+        card = build_service_card(service_id, latest_item, active_alerts)
         if card:
             services.append(card)
 
