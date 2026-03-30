@@ -164,6 +164,23 @@ def try_group_into_incident(owner_id, alert_item):
         print(f'INCIDENT CREATED: {incident_id}')
 
 
+def get_scenario_phase(owner_service, timestamp):
+    try:
+        resp = kpi_table.query(
+            KeyConditionExpression='owner_service = :os AND #ts <= :ts',
+            ExpressionAttributeNames={'#ts': 'timestamp'},
+            ExpressionAttributeValues={':os': owner_service, ':ts': timestamp},
+            ScanIndexForward=False,
+            Limit=1,
+        )
+        items = resp.get('Items', [])
+        if items:
+            return items[0].get('scenario_phase', 'Normal')
+    except Exception as e:
+        print(f'Could not fetch scenario phase: {e}')
+    return 'Normal'
+
+
 def handler(event, context):
     thresholds = load_thresholds()
     for record in event.get('Records', []):
@@ -176,6 +193,9 @@ def handler(event, context):
         timestamp = new_image.get('timestamp', {}).get('S', '')
         features_raw = new_image.get('features', {}).get('M', {})
         if not service_id or not features_raw or not owner_id:
+            continue
+        phase = get_scenario_phase(owner_service, timestamp)
+        if phase == 'Normal':
             continue
         feature_vector = []
         for fname in FEATURE_ORDER:
