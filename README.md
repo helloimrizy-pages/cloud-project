@@ -6,7 +6,7 @@ Real-time AIOps platform for predictive incident detection in cloud services. Us
 
 ## Architecture
 
-![Architecture Diagram](docs/images/architecture_diagram.png)
+![Architecture Diagram](docs/images/architecture_diagram_fixed.png)
 
 **Services monitored:** Web API, DB Pool, Message Queue, Auth Service, ML Pipeline
 
@@ -14,17 +14,17 @@ Real-time AIOps platform for predictive incident detection in cloud services. Us
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend | React 19, TypeScript, Vite, Tailwind CSS 4, Recharts |
-| API | AWS API Gateway (HTTP API), JWT Authorizer |
-| Compute | AWS Lambda (Python 3.11/3.12, Docker) |
-| Database | DynamoDB (6 tables with Streams, per-user isolation) |
-| Storage | S3 (models, frontend) |
-| Notifications | Amazon SNS (per-user email alerts) |
-| Auth | AWS Cognito (SRP protocol) |
-| Scheduler | EventBridge (1-min interval) |
-| ML | scikit-learn Gradient Boosting Classifier |
+| Layer         | Technology                                           |
+| ------------- | ---------------------------------------------------- |
+| Frontend      | React 19, TypeScript, Vite, Tailwind CSS 4, Recharts |
+| API           | AWS API Gateway (HTTP API), JWT Authorizer           |
+| Compute       | AWS Lambda (Python 3.11/3.12, Docker)                |
+| Database      | DynamoDB (6 tables with Streams, per-user isolation) |
+| Storage       | S3 (models, frontend)                                |
+| Notifications | Amazon SNS (per-user email alerts)                   |
+| Auth          | AWS Cognito (SRP protocol)                           |
+| Scheduler     | EventBridge (1-min interval)                         |
+| ML            | scikit-learn Gradient Boosting Classifier            |
 
 ## Project Structure
 
@@ -88,25 +88,25 @@ Real-time AIOps platform for predictive incident detection in cloud services. Us
 
 **Features (8):**
 
-| Feature | Type | Importance |
-|---------|------|-----------|
-| roll_mean | KPI | 31.1% |
-| error_rate | Log | 26.6% |
-| roll_max | KPI | 19.8% |
-| roll_std | KPI | 12.9% |
-| severity_change_flag | Log | 4.6% |
-| first_diff | KPI | 3.5% |
-| roll_slope | KPI | 1.0% |
-| warn_rate | Log | 0.4% |
+| Feature              | Type | Importance |
+| -------------------- | ---- | ---------- |
+| roll_mean            | KPI  | 31.1%      |
+| error_rate           | Log  | 26.6%      |
+| roll_max             | KPI  | 19.8%      |
+| roll_std             | KPI  | 12.9%      |
+| severity_change_flag | Log  | 4.6%       |
+| first_diff           | KPI  | 3.5%       |
+| roll_slope           | KPI  | 1.0%       |
+| warn_rate            | Log  | 0.4%       |
 
 **Performance:**
 
-| Metric | Value |
-|--------|-------|
-| Precision | 0.91 |
-| Mean Lead Time | ~36 min |
+| Metric           | Value               |
+| ---------------- | ------------------- |
+| Precision        | 0.91                |
+| Mean Lead Time   | ~36 min             |
 | False Alarm Rate | <=1/day per service |
-| Detection Rate | 8.7% |
+| Detection Rate   | 8.7%                |
 
 ## API Endpoints
 
@@ -114,40 +114,40 @@ Base URL: `https://p9fpx4nhh6.execute-api.ca-central-1.amazonaws.com`
 
 All routes are JWT-protected via AWS Cognito.
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/services` | List monitored services |
-| GET | `/kpi/{service_id}` | KPI time series for a service |
-| GET | `/thresholds` | Alert thresholds per horizon |
-| GET | `/alerts/active` | Active alerts |
-| GET | `/alerts/history` | Historical alerts |
-| POST | `/alerts/{id}/acknowledge` | Acknowledge an alert |
-| GET | `/incidents` | Grouped incidents |
-| GET | `/simulation/state` | Simulation status |
-| POST | `/simulation/start` | Start simulation (body: `{ scenario }`) |
-| POST | `/simulation/stop` | Stop simulation |
-| GET | `/analytics/summary` | Summary statistics |
-| GET | `/analytics/methods` | Model comparison |
-| GET | `/analytics/features` | Feature importance |
-| GET | `/analytics/lead-times` | Lead time distribution |
-| GET | `/metrics` | Raw metric records |
-| GET | `/logs` | Service log records |
-| GET | `/notifications/status` | Email subscription status |
-| POST | `/notifications/subscribe` | Subscribe to email alerts |
-| POST | `/notifications/unsubscribe` | Unsubscribe from email alerts |
+| Method | Endpoint                     | Description                             |
+| ------ | ---------------------------- | --------------------------------------- |
+| GET    | `/services`                  | List monitored services                 |
+| GET    | `/kpi/{service_id}`          | KPI time series for a service           |
+| GET    | `/thresholds`                | Alert thresholds per horizon            |
+| GET    | `/alerts/active`             | Active alerts                           |
+| GET    | `/alerts/history`            | Historical alerts                       |
+| POST   | `/alerts/{id}/acknowledge`   | Acknowledge an alert                    |
+| GET    | `/incidents`                 | Grouped incidents                       |
+| GET    | `/simulation/state`          | Simulation status                       |
+| POST   | `/simulation/start`          | Start simulation (body: `{ scenario }`) |
+| POST   | `/simulation/stop`           | Stop simulation                         |
+| GET    | `/analytics/summary`         | Summary statistics                      |
+| GET    | `/analytics/methods`         | Model comparison                        |
+| GET    | `/analytics/features`        | Feature importance                      |
+| GET    | `/analytics/lead-times`      | Lead time distribution                  |
+| GET    | `/metrics`                   | Raw metric records                      |
+| GET    | `/logs`                      | Service log records                     |
+| GET    | `/notifications/status`      | Email subscription status               |
+| POST   | `/notifications/subscribe`   | Subscribe to email alerts               |
+| POST   | `/notifications/unsubscribe` | Unsubscribe from email alerts           |
 
 ## DynamoDB Tables
 
 All tables use per-user data isolation via `owner_id` partitioning.
 
-| Table | Partition Key | Sort Key | Purpose |
-|-------|--------------|----------|---------|
-| KPIMetrics | owner_service | timestamp | Raw service metrics |
-| ServiceLogs | owner_service | timestamp | Event logs |
-| FeatureStore | owner_service | timestamp | Computed features |
-| Alerts | owner_id | created_at | Prediction alerts |
-| Incidents | owner_id | created_at | Grouped alerts |
-| SimConfig | owner_id | config_key | Simulation state |
+| Table        | Partition Key | Sort Key   | Purpose             |
+| ------------ | ------------- | ---------- | ------------------- |
+| KPIMetrics   | owner_service | timestamp  | Raw service metrics |
+| ServiceLogs  | owner_service | timestamp  | Event logs          |
+| FeatureStore | owner_service | timestamp  | Computed features   |
+| Alerts       | owner_id      | created_at | Prediction alerts   |
+| Incidents    | owner_id      | created_at | Grouped alerts      |
+| SimConfig    | owner_id      | config_key | Simulation state    |
 
 ## Getting Started
 
