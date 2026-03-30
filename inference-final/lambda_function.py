@@ -183,13 +183,17 @@ def handler(event, context):
             feature_vector.append(float(val))
         X = np.array([feature_vector])
         best_score = 0.0
+        best_alert_params = None
         for H in HORIZONS:
             model = load_model(H)
             score = float(model.predict_proba(X)[0, 1])
             threshold = get_default_threshold(H)
             best_score = max(best_score, score)
             if score > threshold:
-                alert = create_alert(owner_id, service_id, timestamp, score, threshold, H, 0)
-                try_group_into_incident(owner_id, alert)
+                best_alert_params = (score, threshold, H)
+        if best_alert_params:
+            score, threshold, H = best_alert_params
+            alert = create_alert(owner_id, service_id, timestamp, score, threshold, H, 0)
+            try_group_into_incident(owner_id, alert)
         update_kpi_prediction_score(owner_service, timestamp, best_score)
     return {'statusCode': 200}
