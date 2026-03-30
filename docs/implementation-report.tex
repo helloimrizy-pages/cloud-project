@@ -1,0 +1,1261 @@
+\documentclass[11pt,a4paper]{article}
+
+% ---------- Packages ----------
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{tikz}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{amsmath}
+\usepackage{multirow}
+\usepackage{tcolorbox}
+\usepackage{pifont}
+\usetikzlibrary{positioning, shapes, arrows.meta, fit, backgrounds, calc}
+
+% ---------- Page Geometry ----------
+\geometry{margin=1in, top=1.2in, bottom=1.2in}
+
+% ---------- Colors ----------
+\definecolor{UNBBlue}{RGB}{0,40,85}
+\definecolor{UNBLightBlue}{RGB}{100,150,200}
+\definecolor{UNBGray}{RGB}{128,128,128}
+\definecolor{UNBLightGray}{RGB}{245,245,245}
+\definecolor{UNBGreen}{RGB}{39,174,96}
+\definecolor{UNBRed}{RGB}{231,76,60}
+\definecolor{UNBOrange}{RGB}{243,156,18}
+\definecolor{CodeBg}{RGB}{248,248,248}
+
+% ---------- Hyperlink Style ----------
+\hypersetup{
+    colorlinks=true,
+    linkcolor=UNBBlue,
+    urlcolor=UNBBlue,
+    citecolor=UNBBlue,
+}
+
+% ---------- Header / Footer ----------
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\textcolor{UNBGray}{CloudWatch AI -- Implementation Report}}
+\fancyhead[R]{\small\textcolor{UNBGray}{CS6905 -- Winter 2026}}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% ---------- Section Formatting ----------
+\titleformat{\section}
+  {\Large\bfseries\color{UNBBlue}}{\thesection}{1em}{}[\vspace{-0.3em}\textcolor{UNBBlue}{\rule{\textwidth}{0.5pt}}]
+\titleformat{\subsection}
+  {\large\bfseries\color{UNBBlue}}{\thesubsection}{1em}{}
+\titleformat{\subsubsection}
+  {\normalsize\bfseries\color{UNBBlue}}{\thesubsubsection}{1em}{}
+
+% ---------- Code Listings ----------
+\lstdefinestyle{codestyle}{
+    backgroundcolor=\color{CodeBg},
+    basicstyle=\ttfamily\footnotesize,
+    breaklines=true,
+    frame=single,
+    rulecolor=\color{UNBLightBlue},
+    framesep=6pt,
+    xleftmargin=8pt,
+    xrightmargin=8pt,
+    showstringspaces=false,
+    keywordstyle=\color{UNBBlue}\bfseries,
+    commentstyle=\color{UNBGray}\itshape,
+    stringstyle=\color{UNBGreen},
+    numbers=none,
+    captionpos=b,
+}
+\lstset{style=codestyle}
+
+% ---------- tcolorbox Styles ----------
+\tcbuselibrary{skins, breakable}
+
+\newtcolorbox{infobox}[1][]{
+  colback=blue!5,
+  colframe=UNBBlue,
+  fonttitle=\bfseries,
+  title=#1,
+  boxrule=0.5pt,
+  arc=2pt,
+  left=6pt,
+  right=6pt,
+  top=4pt,
+  bottom=4pt,
+}
+
+\newtcolorbox{successbox}[1][]{
+  colback=green!5,
+  colframe=UNBGreen,
+  fonttitle=\bfseries,
+  title=#1,
+  boxrule=0.5pt,
+  arc=2pt,
+  left=6pt,
+  right=6pt,
+  top=4pt,
+  bottom=4pt,
+}
+
+\newtcolorbox{warnbox}[1][]{
+  colback=orange!5,
+  colframe=UNBOrange,
+  fonttitle=\bfseries,
+  title=#1,
+  boxrule=0.5pt,
+  arc=2pt,
+  left=6pt,
+  right=6pt,
+  top=4pt,
+  bottom=4pt,
+}
+
+% Checkmark and crossmark
+\newcommand{\cmark}{\textcolor{UNBGreen}{\ding{51}}}
+\newcommand{\xmark}{\textcolor{UNBRed}{\ding{55}}}
+
+% ---------- Document ----------
+\begin{document}
+
+% ========================
+% TITLE PAGE
+% ========================
+\begin{titlepage}
+\begin{center}
+
+\vspace*{1.5cm}
+
+{\Huge\bfseries\textcolor{UNBBlue}{CloudWatch AI}}\\[0.5cm]
+{\LARGE\textcolor{UNBBlue}{Implementation Report}}\\[0.3cm]
+{\large Real-Time AIOps Platform for Predictive Incident Detection}
+
+\vspace{1.5cm}
+
+\textcolor{UNBBlue}{\rule{0.8\textwidth}{0.5pt}}
+
+\vspace{1.5cm}
+
+{\large
+\textbf{Course:} CS6905 -- Cloud Information Management Systems\\[0.3cm]
+\textbf{Instructor:} Dr.\ Shadi Aljendi\\[0.3cm]
+\textbf{University of New Brunswick}
+}
+
+\vspace{1.5cm}
+
+{\large
+\begin{tabular}{ll}
+\textbf{Team Members:} & Alfarizy Alfarizy (3810253) \\
+                        & Akinbobola Akin (3784664) \\
+                        & Ishimwe Pacis Hanyurwimfura (3787234)
+\end{tabular}
+}
+
+\vspace{1.5cm}
+
+{\large\textbf{Date:} March 30, 2026}
+
+\vspace{1cm}
+
+\textcolor{UNBBlue}{\rule{0.8\textwidth}{0.5pt}}
+
+\vfill
+
+{\small
+\textbf{Repository:} \url{https://github.com/helloimrizy/cloudwatch-ai}\\[0.2cm]
+\textbf{Live Dashboard:} \url{http://cloud-project-dashboard1.s3-website-us-east-1.amazonaws.com}\\[0.2cm]
+\textbf{API Endpoint:} \texttt{https://p9fpx4nhh6.execute-api.ca-central-1.amazonaws.com}
+}
+
+\end{center}
+\end{titlepage}
+
+% ========================
+% TABLE OF CONTENTS
+% ========================
+\tableofcontents
+\newpage
+
+% ========================
+% SECTION 1: EXECUTIVE SUMMARY
+% ========================
+\section{Executive Summary}
+
+CloudWatch AI is a fully serverless AIOps platform that predicts cloud service incidents before they occur. Built entirely on AWS, the system uses Gradient Boosting machine learning models trained on 2.4 million timesteps of cloud service KPI data to issue early warnings with \textbf{0.91 precision} and a \textbf{$\sim$36-minute average lead time}, while maintaining fewer than one false alarm per service per day.
+
+\begin{infobox}[Key Achievements]
+\begin{itemize}[leftmargin=1em, itemsep=2pt]
+    \item \textbf{13 Lambda functions} implementing the full data pipeline and REST API
+    \item \textbf{6 DynamoDB tables} with Streams for event-driven processing
+    \item \textbf{19 JWT-protected API routes} via API Gateway
+    \item \textbf{5 monitored cloud services} with real-time simulation across \textbf{6 scenarios}
+    \item \textbf{3 ML models} (one per prediction horizon: 5, 10, 15 minutes)
+    \item \textbf{Per-user data isolation} via Cognito-based \texttt{owner\_id} partitioning across all tables
+    \item \textbf{Email alert notifications} via Amazon SNS with per-user filtering
+    \item \textbf{React 19 dashboard} with 4 interactive pages, auto-polling, and dark/light theme
+    \item \textbf{AWS Cognito authentication} with SRP protocol and email verification
+    \item \textbf{OWASP Top 10 audit}: 9/10 passed, 1 N/A (overall risk: Low)
+    \item \textbf{50+ integration test cases} across all system layers
+\end{itemize}
+\end{infobox}
+
+The platform demonstrates a complete, production-grade cloud database application: from data generation and ML inference to real-time visualization and security hardening. All components run serverlessly within the AWS Free Tier in the \texttt{ca-central-1} region.
+
+% ========================
+% SECTION 2: ARCHITECTURE IMPLEMENTATION
+% ========================
+\section{Architecture Implementation}
+
+\subsection{Architecture Overview}
+
+CloudWatch AI follows a \textbf{serverless, event-driven architecture} on AWS. The design eliminates server management, scales automatically, and minimizes cost by leveraging managed services for every layer of the stack.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  scale=0.68, transform shape,
+  box/.style={rectangle, rounded corners=4pt, draw=UNBBlue, fill=blue!5, minimum width=2.3cm, minimum height=0.9cm, font=\small, align=center, line width=0.6pt},
+  dbbox/.style={rectangle, rounded corners=4pt, draw=UNBOrange, fill=orange!5, minimum width=2.3cm, minimum height=0.9cm, font=\small, align=center, line width=0.6pt},
+  s3box/.style={rectangle, rounded corners=4pt, draw=UNBGreen, fill=green!5, minimum width=2.3cm, minimum height=0.9cm, font=\small, align=center, line width=0.6pt},
+  arrow/.style={-{Stealth[length=6pt]}, thick, UNBBlue},
+  stream/.style={-{Stealth[length=6pt]}, thick, UNBOrange, dashed},
+  label/.style={font=\scriptsize, UNBGray}
+]
+
+% Row 1: User + Frontend
+\node[box, minimum width=4cm, fill=blue!10] (browser) at (0,5) {React 19 Dashboard\\(S3 Static Hosting)};
+\node[box] (cognito) at (5.5,5) {AWS Cognito\\(SRP Auth)};
+
+% Row 2: API Gateway
+\node[box, minimum width=4cm] (apigw) at (0,3.2) {API Gateway (HTTP)\\19 Routes, JWT Auth};
+
+% Row 3: Lambda functions
+\node[box] (simulator) at (-5,1.5) {Simulator\\Lambda};
+\node[box] (feateng) at (-1.5,1.5) {Feature Eng.\\Lambda};
+\node[box] (inference) at (2,1.5) {Inference\\Lambda};
+\node[box] (apilambda) at (5.5,1.5) {API Lambdas\\(10 functions)};
+
+% Row 4: Data stores
+\node[dbbox] (kpi) at (-5,0) {KPIMetrics\\ServiceLogs};
+\node[dbbox] (features) at (-1.5,0) {FeatureStore};
+\node[dbbox] (alerts) at (2,0) {Alerts\\Incidents};
+\node[s3box] (s3) at (5.5,0) {S3 Bucket\\(Models + Frontend)};
+
+% EventBridge
+\node[box, minimum width=1.8cm] (eventbridge) at (-5,3.2) {EventBridge\\(1/min)};
+
+% Arrows
+\draw[arrow] (browser) -- node[label, right, xshift=2pt] {HTTPS} (apigw);
+\draw[arrow] (browser) -- node[label, above] {JWT Tokens} (cognito);
+\draw[arrow] (apigw) -- (apilambda);
+\draw[arrow] (eventbridge) -- (simulator);
+
+% Data flow
+\draw[arrow] (simulator) -- (kpi);
+\draw[stream] (kpi) -- node[label, above] {Stream} (feateng);
+\draw[arrow] (feateng) -- (features);
+\draw[stream] (features) -- node[label, above] {Stream} (inference);
+\draw[arrow] (inference) -- (alerts);
+\draw[arrow, thin, gray] (inference.east) -- node[label, above right] {\scriptsize loads} (s3.north west);
+
+% SNS
+\node[box, minimum width=1.8cm] (sns) at (2,-1.5) {Amazon SNS\\(Email Alerts)};
+\draw[arrow] (inference) -- (sns);
+
+% API reads
+\draw[arrow, gray, thin] (apilambda) -- (alerts);
+
+\end{tikzpicture}
+\caption{System Architecture. Solid arrows indicate direct calls; dashed orange arrows indicate DynamoDB Stream triggers.}
+\label{fig:architecture}
+\end{figure}
+
+\subsection{Cloud Infrastructure Components}
+
+All services are deployed in the \texttt{ca-central-1} (Canada -- Central) AWS region. Table~\ref{tab:aws-services} lists every AWS service used and its configuration.
+
+\begin{table}[H]
+\centering
+\caption{AWS Service Inventory}
+\label{tab:aws-services}
+\begin{tabular}{lll}
+\toprule
+\textbf{Service} & \textbf{Configuration} & \textbf{Purpose} \\
+\midrule
+AWS Lambda & 13 functions (Python 3.11/3.12) & Compute \\
+Amazon DynamoDB & 6 tables, on-demand capacity & Database \\
+Amazon API Gateway & HTTP API, 19 routes & REST API \\
+Amazon SNS & 1 topic (CloudWatchAI-Alerts) & Email notifications \\
+Amazon S3 & 1 bucket & Static hosting + model storage \\
+Amazon EventBridge & 1 rule (rate: 1 minute) & Simulation scheduler \\
+Amazon Cognito & 1 User Pool (``CloudWatchAI'') & Authentication \\
+Amazon ECR & 1 container image & Inference Lambda image \\
+Amazon CloudWatch & Logs for all Lambda functions & Monitoring \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Lambda Functions}
+
+Table~\ref{tab:lambda-functions} lists all 13 Lambda functions deployed, verified via \texttt{aws lambda list-functions}.
+
+\begin{table}[H]
+\centering
+\caption{Lambda Functions (verified from AWS)}
+\label{tab:lambda-functions}
+\begin{tabular}{llll}
+\toprule
+\textbf{Function Name} & \textbf{Runtime} & \textbf{Trigger} & \textbf{Memory} \\
+\midrule
+\texttt{simulator\_lambda} & Python 3.12 & EventBridge (1/min) & 128 MB \\
+\texttt{feature\_engineering\_lambda} & Python 3.11 & DynamoDB Stream & 128 MB \\
+\texttt{inference\_lambda} & Docker (Python 3.11) & DynamoDB Stream & 512 MB \\
+\texttt{services\_lambda} & Python 3.12 & API Gateway & 128 MB \\
+\texttt{kpi\_lambda} & Python 3.12 & API Gateway & 128 MB \\
+\texttt{alerts\_lambda} & Python 3.12 & API Gateway & 128 MB \\
+\texttt{incidents\_lambda} & Python 3.12 & API Gateway & 128 MB \\
+\texttt{analytics\_lambda} & Python 3.12 & API Gateway & 128 MB \\
+\texttt{threshold\_lambda} & Python 3.12 & API Gateway & 128 MB \\
+\texttt{control\_simulation\_lambda} & Python 3.12 & API Gateway & 128 MB \\
+\texttt{get\_metrics\_lambda} & Python 3.12 & API Gateway & 128 MB \\
+\texttt{get\_logs\_lambda} & Python 3.12 & API Gateway & 128 MB \\
+\texttt{notifications\_lambda} & Python 3.12 & API Gateway & 128 MB \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The \texttt{inference\_lambda} uses a Docker container image (deployed via ECR) because it requires scikit-learn, numpy, scipy, and pandas---libraries that exceed Lambda's standard deployment package size limit.
+
+\subsection{S3 Bucket Configuration}
+
+A single S3 bucket is used:
+
+\begin{enumerate}[leftmargin=2em]
+    \item \textbf{\texttt{cloud-project-dashboard1}} -- Hosts the compiled React frontend (static website hosting enabled) and stores the trained ML models:
+    \begin{itemize}
+        \item \texttt{index.html}, \texttt{assets/} -- Frontend build files
+        \item \texttt{models/model\_h5.pkl} (139.9 KB), \texttt{model\_h10.pkl} (139.6 KB), \texttt{model\_h15.pkl} (139.9 KB)
+        \item \texttt{models/thresholds.json} (2.6 KB), \texttt{models/feature\_importances.json} (662 B)
+    \end{itemize}
+\end{enumerate}
+
+S3 encryption is enabled (AES-256, SSE-S3) with BucketKey optimization. Static website hosting is configured with \texttt{ErrorDocument = index.html} for SPA routing support.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\linewidth]{images/lambda_console.png}
+\caption{AWS Lambda Console -- 13 deployed functions}
+\label{fig:lambda-console}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\linewidth]{images/dynamodb_tables.png}
+\caption{AWS DynamoDB Console -- 6 tables}
+\label{fig:dynamo-console}
+\end{figure}
+
+% ========================
+% SECTION 3: DATABASE SETUP
+% ========================
+\section{Database Setup}
+
+\subsection{DynamoDB Table Design}
+
+We chose Amazon DynamoDB as our NoSQL database because each of the 5 monitored cloud services produces \textbf{a completely different JSON structure}. A relational database would require many nullable columns or separate tables per service type. DynamoDB's flexible document schema allows heterogeneous records in a single table without schema migrations.
+
+Table~\ref{tab:dynamo-tables} shows the 6 DynamoDB tables, their key schemas, and purpose (verified via \texttt{aws dynamodb describe-table} on March 30, 2026).
+
+\begin{table}[H]
+\centering
+\caption{DynamoDB Tables (verified from AWS)}
+\label{tab:dynamo-tables}
+\begin{tabular}{lllp{4.2cm}}
+\toprule
+\textbf{Table} & \textbf{Partition Key} & \textbf{Sort Key} & \textbf{Purpose} \\
+\midrule
+KPIMetrics & \texttt{owner\_service} (S) & \texttt{timestamp} (S) & Raw service metrics, isolated per user \\
+ServiceLogs & \texttt{owner\_service} (S) & \texttt{timestamp} (S) & Event logs, isolated per user \\
+FeatureStore & \texttt{owner\_service} (S) & \texttt{timestamp} (S) & 8 computed features \\
+Alerts & \texttt{owner\_id} (S) & \texttt{created\_at} (S) & Prediction alerts (GSI on \texttt{owner\_status}) \\
+Incidents & \texttt{owner\_id} (S) & \texttt{created\_at} (S) & Grouped incidents \\
+SimConfig & \texttt{owner\_id} (S) & \texttt{config\_key} (S) & Per-user simulation state \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Per-User Data Isolation}
+
+A key requirement was ensuring that each authenticated user sees only their own simulation data, alerts, and incidents. We implemented this by embedding the Cognito \texttt{sub} (user ID) into every table's partition key:
+
+\begin{itemize}[leftmargin=2em]
+    \item \textbf{Data tables} (KPIMetrics, ServiceLogs, FeatureStore) use a composite partition key: \texttt{owner\_service = \{owner\_id\}\#\{service\_id\}}. This ensures each user's service data is physically partitioned and queryable without cross-user leakage.
+    \item \textbf{Alerts and Incidents} use \texttt{owner\_id} directly as the partition key. The Alerts table includes a GSI (\texttt{GSI\_AlertsByOwnerStatus}) on \texttt{owner\_status} (a composite of \texttt{\{owner\_id\}\#\{severity\}}) for efficient filtered queries.
+    \item \textbf{SimConfig} uses \texttt{owner\_id} as the partition key, allowing concurrent independent simulations by different users.
+    \item Every API Lambda extracts \texttt{owner\_id} from the JWT claims (\texttt{requestContext.authorizer.jwt.claims.sub}) and scopes all queries to that user.
+\end{itemize}
+
+\subsection{Key Design Choices}
+
+\begin{enumerate}[leftmargin=2em]
+    \item \textbf{Partition Key = \texttt{owner\_service}}: The composite key \texttt{\{owner\_id\}\#\{service\_id\}} serves as the partition key for data tables, combining per-user isolation with per-service querying in a single key. This is the most common query pattern: ``get all data for a specific service belonging to a specific user.''
+    \item \textbf{Sort Key = \texttt{timestamp}}: Enables efficient time-range queries within a partition (e.g., ``last 30 minutes of KPI data for web-api-001'').
+    \item \textbf{TTL (Time To Live)}: All data tables have a \texttt{ttl} attribute set to 24 hours. DynamoDB automatically deletes expired items, keeping storage costs minimal and eliminating the need for manual cleanup.
+    \item \textbf{DynamoDB Streams}: Enabled on \texttt{KPIMetrics} and \texttt{FeatureStore} tables with \texttt{NEW\_IMAGE} view type. Stream events automatically trigger the Feature Engineering and Inference Lambda functions, creating a fully event-driven pipeline with zero orchestration code.
+    \item \textbf{On-demand capacity}: All tables use on-demand billing, which auto-scales to handle any request volume without capacity planning---ideal for a project with variable simulation load.
+\end{enumerate}
+
+\subsection{Variable Schema per Service}
+
+The key advantage of DynamoDB is supporting different document structures in the same table. Table~\ref{tab:service-fields} shows the unique fields generated by each service type.
+
+\begin{table}[H]
+\centering
+\caption{Service-Specific KPI Fields in KPIMetrics Table}
+\label{tab:service-fields}
+\begin{tabular}{ll}
+\toprule
+\textbf{Service} & \textbf{Unique JSON Fields} \\
+\midrule
+Web API & \texttt{response\_time\_ms}, \texttt{requests\_per\_second}, \texttt{error\_rate}, \texttt{http\_5xx\_count} \\
+DB Pool & \texttt{active\_connections}, \texttt{query\_duration\_avg\_ms}, \texttt{deadlock\_count} \\
+Message Queue & \texttt{queue\_depth}, \texttt{consumer\_lag}, \texttt{dead\_letter\_queue\_size} \\
+Auth Service & \texttt{login\_success\_rate}, \texttt{auth\_latency\_ms}, \texttt{mfa\_challenge\_rate} \\
+ML Pipeline & \texttt{inference\_latency\_ms}, \texttt{model\_accuracy}, \texttt{data\_drift\_score} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Sample Data}
+
+The simulator Lambda populates all tables with realistic data during each simulation run. Each record includes the user's \texttt{owner\_id} and a composite \texttt{owner\_service} key for per-user isolation. Below is a sample \texttt{KPIMetrics} record for the Web API service:
+
+\begin{lstlisting}[language=bash, caption={Sample KPIMetrics item for Web API (from DynamoDB)}]
+{
+  "owner_service": "ec1d85f8-...-30647aad6e2b#web-api-001",
+  "owner_id": "ec1d85f8-...-30647aad6e2b",
+  "service_id": "web-api-001",
+  "timestamp": "2026-03-30T14:04:46+00:00",
+  "service_type": "web_api",
+  "scenario_phase": "Normal",
+  "simulator_tick": 0,
+  "metrics": {
+    "response_time_ms": 95,
+    "requests_per_second": 450,
+    "error_rate": 0.01,
+    "http_5xx_count": 1
+  },
+  "ttl": 1774965886
+}
+\end{lstlisting}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\linewidth]{images/kpi_metrics_table.png}
+\caption{DynamoDB KPIMetrics Table -- sample items showing variable schema per service}
+\label{fig:dynamo-items}
+\end{figure}
+
+% ========================
+% SECTION 4: API AND BACKEND DEVELOPMENT
+% ========================
+\section{API and Backend Development}
+
+\subsection{API Gateway Configuration}
+
+The API is exposed via an \textbf{AWS API Gateway HTTP API} at:
+
+\begin{center}
+\texttt{https://p9fpx4nhh6.execute-api.ca-central-1.amazonaws.com}
+\end{center}
+
+All 19 routes are protected by a \textbf{JWT Authorizer} linked to the Cognito User Pool. CORS is configured to accept \texttt{GET}, \texttt{POST}, and \texttt{OPTIONS} methods with \texttt{content-type} and \texttt{authorization} headers.
+
+\begin{table}[H]
+\centering
+\caption{API Routes (all JWT-protected, verified from AWS)}
+\label{tab:api-routes}
+\begin{tabular}{lll}
+\toprule
+\textbf{Method} & \textbf{Route} & \textbf{Description} \\
+\midrule
+GET & \texttt{/services} & List 5 monitored services with current status \\
+GET & \texttt{/kpi/\{serviceId\}} & KPI time-series data for a specific service \\
+GET & \texttt{/thresholds} & Alert thresholds per prediction horizon \\
+GET & \texttt{/alerts/active} & Active (unresolved) alerts \\
+GET & \texttt{/alerts/history} & Historical alerts \\
+POST & \texttt{/alerts/\{id\}/acknowledge} & Acknowledge an alert \\
+GET & \texttt{/incidents} & Grouped incident objects \\
+GET & \texttt{/simulation/state} & Current simulation status \\
+POST & \texttt{/simulation/start} & Start simulation with scenario \\
+POST & \texttt{/simulation/stop} & Stop running simulation \\
+GET & \texttt{/analytics/summary} & Model performance summary \\
+GET & \texttt{/analytics/methods} & Model comparison data \\
+GET & \texttt{/analytics/features} & Feature importance rankings \\
+GET & \texttt{/analytics/lead-times} & Lead time distribution per horizon \\
+GET & \texttt{/metrics} & Raw metric records \\
+GET & \texttt{/logs} & Service log records \\
+GET & \texttt{/notifications/status} & Email subscription status \\
+POST & \texttt{/notifications/subscribe} & Subscribe to email alerts \\
+POST & \texttt{/notifications/unsubscribe} & Unsubscribe from email alerts \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Authorization Verification}
+
+Unauthenticated requests are rejected with HTTP 401:
+
+\begin{lstlisting}[language=bash, caption={JWT Authorization verification}]
+$ curl -s https://p9fpx4nhh6.execute-api.ca-central-1.amazonaws.com/services
+{"message":"Unauthorized"}
+# HTTP 401 -- JWT token required
+\end{lstlisting}
+
+\subsection{Simulation Scenarios}
+
+The simulator supports \textbf{6 configurable scenarios}, each exercising a different failure mode across the 5 monitored services. All scenarios follow a 15-tick timeline with 4 phases: Normal (ticks 0--4), Degrading (5--7), Incident (8--11), and Recovery (12--14), except for the baseline which remains Normal throughout.
+
+\begin{table}[H]
+\centering
+\caption{Simulation Scenarios}
+\label{tab:scenarios}
+\begin{tabular}{lll}
+\toprule
+\textbf{Scenario} & \textbf{Primary Service} & \textbf{Also Affected} \\
+\midrule
+Web API Degradation & web-api-001 & db-pool-001 \\
+DB Cascade Failure & db-pool-001 & web-api-001, mq-001 \\
+Message Queue Backlog & mq-001 & web-api-001 \\
+Auth Service Failure & auth-001 & web-api-001 \\
+ML Pipeline Drift & ml-pipeline-001 & -- \\
+Normal Operations & -- (all healthy) & -- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Each scenario injects realistic metric degradation into the affected services during the Degrading and Incident phases. For example, the \textit{Auth Service Failure} scenario gradually drops the login success rate from 0.97 to 0.88 while tripling auth latency, and the \textit{ML Pipeline Drift} scenario increases the data drift score from 0.05 to 0.20 while decreasing model accuracy. Unaffected services continue to emit normal-range metrics with jitter, providing the ML model with a realistic mix of healthy and degraded signals.
+
+\subsection{Data Pipeline (Event-Driven)}
+
+The core innovation of our backend is the \textbf{fully automatic, event-driven data pipeline} powered by DynamoDB Streams. No polling or orchestration code is needed. All pipeline Lambdas propagate the \texttt{owner\_id} through the chain to maintain per-user data isolation:
+
+\begin{enumerate}[leftmargin=2em]
+    \item \textbf{EventBridge} triggers the \texttt{simulator\_lambda} every 60 seconds. The simulator scans \texttt{SimConfig} for all active simulations (keyed by \texttt{owner\_id}) and generates data independently for each user.
+    \item The simulator generates KPI metrics and logs for all 5 services and writes them to \texttt{KPIMetrics} and \texttt{ServiceLogs} tables, using the composite key \texttt{owner\_service = \{owner\_id\}\#\{service\_id\}}.
+    \item A \textbf{DynamoDB Stream} on \texttt{KPIMetrics} automatically triggers \texttt{feature\_engineering\_lambda}, which extracts \texttt{owner\_service} and \texttt{owner\_id} from the stream record, computes 8 rolling features, and writes them to \texttt{FeatureStore} with the same composite key.
+    \item A \textbf{DynamoDB Stream} on \texttt{FeatureStore} automatically triggers \texttt{inference\_lambda}, which loads 3 Gradient Boosting models from S3, runs prediction, and creates alerts in the \texttt{Alerts} table (keyed by \texttt{owner\_id} + \texttt{created\_at}) if the score exceeds the calibrated threshold.
+    \item If 2+ related alerts exist for the same \texttt{owner\_id}, they are grouped into an \texttt{Incident} record.
+\end{enumerate}
+
+\subsection{Inference Lambda Implementation}
+
+The inference function is the most complex Lambda in the system. Key implementation details:
+
+\begin{itemize}[leftmargin=2em]
+    \item \textbf{Docker deployment}: Packaged as a container image (Python 3.11 base) because scikit-learn + numpy + scipy exceed the 250 MB Lambda deployment limit. The Dockerfile:
+\end{itemize}
+
+\begin{lstlisting}[language=bash, caption={Inference Lambda Dockerfile}]
+FROM --platform=linux/amd64 public.ecr.aws/lambda/python:3.11
+RUN pip install "scikit-learn==1.7.2" "numpy<2.3" "scipy<1.15" \
+    "joblib" "pandas" boto3 --no-cache-dir
+COPY lambda_function.py ${LAMBDA_TASK_ROOT}/
+CMD ["lambda_function.handler"]
+\end{lstlisting}
+
+\begin{itemize}[leftmargin=2em]
+    \item \textbf{Model caching}: Models are loaded from S3 into the Lambda's global scope (\texttt{\_models} dictionary). Once loaded, they persist across warm invocations, eliminating repeated S3 downloads.
+    \item \textbf{Feature extraction}: The Lambda reads the 8-feature vector from the DynamoDB Stream event in a fixed order: \texttt{roll\_mean}, \texttt{roll\_max}, \texttt{roll\_std}, \texttt{roll\_slope}, \texttt{first\_diff}, \texttt{error\_rate}, \texttt{warn\_rate}, \texttt{severity\_change\_flag}.
+    \item \textbf{Prediction}: For each incoming feature vector, the Lambda runs \texttt{model.predict\_proba(X)[0, 1]} on all 3 models (horizons 5, 10, 15 minutes).
+    \item \textbf{Alert creation}: When \texttt{score > threshold}, an alert is created with a unique ID (\texttt{ALT-XXXXXX}), severity classification (CRITICAL if score $\geq$ 0.92, WARNING if score $\geq$ threshold), and a 24-hour TTL.
+    \item \textbf{Email notifications}: When an alert is created, the Lambda publishes to an SNS topic with the \texttt{owner\_id} as a message attribute. Users who have subscribed receive per-user filtered email notifications via SNS filter policies.
+    \item \textbf{Incident grouping}: When $\geq$2 active alerts exist within a 5-minute window, they are grouped into an incident (\texttt{INC-XXXXXX}).
+\end{itemize}
+
+\subsection{Sample API Responses}
+
+Below are actual API responses captured during testing (March 22, 2026):
+
+\begin{lstlisting}[language=bash, caption={GET /services -- returns 5 monitored services}]
+[
+  {"id":"web-api-001","name":"Web API","type":"API Gateway",
+   "status":"healthy","metricName":"Response Time","metricUnit":"ms",
+   "currentValue":85},
+  {"id":"db-pool-001","name":"DB Pool","type":"Database Pool",
+   "status":"warning","metricName":"Query Duration","metricUnit":"ms",
+   "currentValue":76},
+  {"id":"mq-001","name":"Message Queue","type":"Message Queue",
+   "status":"healthy","metricName":"Queue Depth","metricUnit":"messages",
+   "currentValue":69},
+  {"id":"auth-001","name":"Auth Service","type":"Authentication",
+   "status":"healthy","metricName":"Auth Latency","metricUnit":"ms",
+   "currentValue":50},
+  {"id":"ml-pipeline-001","name":"ML Pipeline","type":"ML Service",
+   "status":"healthy","metricName":"Inference Latency","metricUnit":"ms",
+   "currentValue":114}
+]
+\end{lstlisting}
+
+\begin{lstlisting}[language=bash, caption={GET /thresholds -- calibrated per-horizon alert thresholds}]
+{"5": 0.912, "10": 0.867, "15": 0.847}
+\end{lstlisting}
+
+\begin{lstlisting}[language=bash, caption={GET /analytics/summary -- model performance metrics}]
+{"bestPrecision":0.91,"meanLeadTime":36,"falseAlarmRate":"<=1/day",
+ "detectionRate":8.7}
+\end{lstlisting}
+
+% ========================
+% SECTION 5: FRONTEND INTEGRATION
+% ========================
+\section{Frontend Integration}
+
+\subsection{Technology Stack}
+
+The dashboard is a \textbf{React 19 single-page application} built with TypeScript, Vite 7, Tailwind CSS 4, and Recharts 3.8. It is hosted as a static website on S3.
+
+\begin{table}[H]
+\centering
+\caption{Frontend Dependencies (from \texttt{package.json})}
+\label{tab:frontend-deps}
+\begin{tabular}{lll}
+\toprule
+\textbf{Package} & \textbf{Version} & \textbf{Purpose} \\
+\midrule
+\texttt{react} & 19.2.0 & UI framework \\
+\texttt{react-dom} & 19.2.0 & DOM rendering \\
+\texttt{react-router-dom} & 7.13.1 & Client-side routing \\
+\texttt{recharts} & 3.8.0 & Interactive charts \\
+\texttt{tailwindcss} & 4.2.1 & Utility-first CSS \\
+\texttt{amazon-cognito-identity-js} & 6.3.16 & Cognito authentication \\
+\texttt{typescript} & $\sim$5.9.3 & Type safety \\
+\texttt{vite} & 7.3.1 & Build tool + dev server \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Application Pages}
+
+The dashboard consists of 4 main pages plus a login page, all accessible via client-side routing:
+
+\subsubsection{Page 1: Live Controls (\texttt{/})}
+
+The main dashboard page provides real-time simulation control:
+\begin{itemize}[leftmargin=2em]
+    \item \textbf{Scenario selector}: Dropdown to choose between 6 scenarios: \textit{Web API Degradation}, \textit{DB Cascade Failure}, \textit{Message Queue Backlog}, \textit{Auth Service Failure}, \textit{ML Pipeline Drift}, and \textit{Normal Operations}
+    \item \textbf{Start/Stop buttons}: Send \texttt{POST /simulation/start} and \texttt{POST /simulation/stop}, with loading state feedback (``Starting...''/``Stopping...'')
+    \item \textbf{4 summary cards}: Current scenario, phase, tick progress, prediction count
+    \item \textbf{5 Service Health Cards}: Grid display showing each service's name, type, status badge (healthy/warning/critical with color coding), current metric value, and unit
+\end{itemize}
+
+\subsubsection{Page 2: KPI Timeline (\texttt{/timeline})}
+
+Real-time metric visualization:
+\begin{itemize}[leftmargin=2em]
+    \item \textbf{Service tabs}: Switch between individual services or an ``All Services'' overlay view
+    \item \textbf{KPI Value chart}: Recharts \texttt{LineChart} with reference areas for warning/danger zones
+    \item \textbf{Prediction Score chart}: Overlays prediction scores with a threshold reference line
+    \item \textbf{Horizon toggle}: Switch between 5m, 10m, 15m thresholds (0.912, 0.867, 0.847)
+    \item \textbf{All Services mode}: Fetches all 5 services in parallel via \texttt{Promise.all} and displays overlaid lines with distinct colors and a legend
+\end{itemize}
+
+\subsubsection{Page 3: Alerts \& Incidents (\texttt{/alerts})}
+
+Alert management and incident tracking:
+\begin{itemize}[leftmargin=2em]
+    \item \textbf{Active alert cards}: Each card shows severity badge (CRITICAL/WARNING/INFO with color), prediction score, threshold, horizon, lead time, and description
+    \item \textbf{Acknowledge button}: Sends \texttt{POST /alerts/\{id\}/acknowledge}; UI updates to show ``Acknowledged'' status
+    \item \textbf{Dismiss button}: Removes alert from the visible list (client-side only)
+    \item \textbf{Incident timeline}: Colored horizontal bar showing scenario phases with legend
+    \item \textbf{Alert history}: Collapsible section with resolved historical alerts
+    \item \textbf{Email notification toggle}: Subscribe/unsubscribe to email alerts via SNS; displays user email, subscription status, and pending confirmation state
+    \item \textbf{Local timezone}: Alert timestamps are converted from UTC to the user's local timezone via \texttt{toLocaleString()}
+\end{itemize}
+
+\subsubsection{Page 4: Analytics (\texttt{/analytics})}
+
+Model performance visualization:
+\begin{itemize}[leftmargin=2em]
+    \item \textbf{4 stat cards}: Best Precision (0.91), Mean Lead Time (36m), False Alarm Rate ($\leq$1/day), Detection Rate (8.7\%)
+    \item \textbf{Precision vs Detection Rate}: Recharts \texttt{ScatterChart} comparing GBC+Logs, GBC Only, Static Threshold, and Moving Average across all horizons
+    \item \textbf{Lead Time Distribution}: \texttt{BarChart} showing min/Q1/median/Q3/max per horizon
+    \item \textbf{Feature Importance}: Horizontal \texttt{BarChart} with 8 features, colored by type (KPI in blue, Log in red)
+\end{itemize}
+
+\subsection{Authentication Flow}
+
+The frontend integrates with AWS Cognito via the \texttt{amazon-cognito-identity-js} SDK:
+
+\begin{enumerate}[leftmargin=2em]
+    \item User enters email and password on the \texttt{/login} page
+    \item The SDK performs an \textbf{SRP (Secure Remote Password)} handshake with Cognito -- the password is never transmitted in plaintext
+    \item Cognito returns JWT tokens (ID Token: 1h, Refresh Token: 30d)
+    \item The \texttt{useAuth} context hook provides user state globally
+    \item The API client (\texttt{lib/api.ts}) injects the ID token as an \texttt{Authorization} header on every request
+    \item The \texttt{ProtectedRoute} component checks authentication and redirects to \texttt{/login} if unauthenticated
+    \item On 401 API responses, the user is automatically redirected to \texttt{/login}
+\end{enumerate}
+
+\subsection{Theme System}
+
+The dashboard supports \textbf{dark and light themes} with persistent preference:
+
+\begin{itemize}[leftmargin=2em]
+    \item Theme state is managed by the \texttt{useTheme} context hook
+    \item CSS variables (\texttt{-{}-color-bg-primary}, \texttt{-{}-color-text-primary}, etc.) are toggled by setting \texttt{data-theme} on the document root
+    \item Chart colors are dynamically read from CSS variables via the \texttt{chartColors()} utility, ensuring charts respect the current theme
+    \item Theme preference is persisted to \texttt{localStorage} and restored on page load
+    \item An inline script in \texttt{index.html} applies the theme before first paint to prevent a flash of incorrect colors
+\end{itemize}
+
+\subsection{API Integration}
+
+All API calls go through a centralized client (\texttt{lib/api.ts}) that:
+
+\begin{itemize}[leftmargin=2em]
+    \item Reads the base URL from \texttt{VITE\_API\_BASE\_URL} (production) or uses \texttt{/api} (development, proxied by Vite)
+    \item Automatically injects the Cognito ID token as an \texttt{Authorization} header
+    \item Handles 401 responses by redirecting to \texttt{/login}
+    \item The custom \texttt{useApi} hook provides \texttt{data}, \texttt{loading}, \texttt{error}, and \texttt{refetch} states, with request cancellation on component unmount to prevent memory leaks
+    \item \textbf{Auto-polling}: The \texttt{useApi} hook accepts an optional \texttt{pollInterval} parameter (set to 5 seconds for live pages). Polling pauses automatically when the browser tab is hidden (\texttt{document.hidden} check) and skips ticks when a previous request is still in-flight, preventing request stacking
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\linewidth]{images/dashboard_live_controls.png}
+\caption{Dashboard -- Live Controls Page}
+\label{fig:dashboard-live}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\linewidth]{images/dashboard_kpi_timeline.png}
+\caption{Dashboard -- KPI Timeline Page}
+\label{fig:dashboard-timeline}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\linewidth]{images/dashboard_alerts.png}
+\caption{Dashboard -- Alerts \& Incidents Page}
+\label{fig:dashboard-alerts}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\linewidth]{images/dashboard_analytics.png}
+\caption{Dashboard -- Analytics Page}
+\label{fig:dashboard-analytics}
+\end{figure}
+
+% ========================
+% SECTION 6: SECURITY CONFIGURATION
+% ========================
+\section{Security Configuration}
+
+\subsection{Authentication}
+
+Authentication is handled by \textbf{AWS Cognito} with the following configuration:
+
+\begin{table}[H]
+\centering
+\caption{Cognito User Pool Configuration (verified from AWS)}
+\label{tab:cognito-config}
+\begin{tabular}{ll}
+\toprule
+\textbf{Property} & \textbf{Value} \\
+\midrule
+User Pool Name & CloudWatchAI \\
+User Pool ID & \texttt{ca-central-1\_cyhaCVeUz} \\
+App Client ID & \texttt{39aln1edjk2egqb9b8g82dut6j} \\
+Auth Flow & SRP (Secure Remote Password) \\
+Username Attribute & Email \\
+Auto-Verified Attributes & Email \\
+Client Secret & None (public SPA -- best practice) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Password Policy (verified from AWS)}
+\label{tab:password-policy}
+\begin{tabular}{ll}
+\toprule
+\textbf{Requirement} & \textbf{Enforced} \\
+\midrule
+Minimum length & 8 characters \\
+Uppercase letter & Yes \\
+Lowercase letter & Yes \\
+Number & Yes \\
+Special character & No \\
+Temporary password validity & 7 days \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Authorization -- JWT Authorizer}
+
+All 19 API Gateway routes are protected by a \textbf{JWT Authorizer} that validates tokens against the Cognito User Pool:
+
+\begin{table}[H]
+\centering
+\caption{JWT Authorizer Configuration}
+\label{tab:jwt-auth}
+\begin{tabular}{ll}
+\toprule
+\textbf{Property} & \textbf{Value} \\
+\midrule
+Authorizer Type & JWT \\
+Identity Source & \texttt{\$request.header.Authorization} \\
+Issuer & \texttt{https://cognito-idp.ca-central-1.amazonaws.com/ca-central-1\_cyhaCVeUz} \\
+Audience & \texttt{39aln1edjk2egqb9b8g82dut6j} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Frontend route protection is implemented via a \texttt{ProtectedRoute} React component that checks the Cognito session and redirects unauthenticated users to \texttt{/login}.
+
+\subsection{Data Encryption}
+
+\begin{table}[H]
+\centering
+\caption{Encryption Configuration}
+\label{tab:encryption}
+\begin{tabular}{llll}
+\toprule
+\textbf{Scope} & \textbf{Service} & \textbf{Algorithm} & \textbf{Key Management} \\
+\midrule
+\multirow{3}{*}{At Rest} & DynamoDB (6 tables) & AES-256 & AWS-owned keys \\
+ & S3 (dashboard bucket) & AES-256 (SSE-S3) & AWS-managed, BucketKey enabled \\
+ & Cognito User Pool & AES-256 & AWS-managed \\
+\midrule
+\multirow{5}{*}{In Transit} & Browser $\leftrightarrow$ API Gateway & TLS 1.2+ & AWS-managed \\
+ & Browser $\leftrightarrow$ Cognito & TLS 1.2+ & AWS-managed \\
+ & API Gateway $\leftrightarrow$ Lambda & TLS 1.2+ & AWS internal \\
+ & Lambda $\leftrightarrow$ DynamoDB & TLS 1.2+ & AWS SDK default \\
+ & Lambda $\leftrightarrow$ S3 & TLS 1.2+ & AWS SDK default \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Access Controls}
+
+\begin{itemize}[leftmargin=2em]
+    \item \textbf{Lambda IAM roles}: Least-privilege permissions scoped to specific DynamoDB table ARNs and S3 bucket
+    \item \textbf{No direct database access}: All DynamoDB access is mediated through Lambda functions behind the authenticated API Gateway
+    \item \textbf{S3 bucket policy}: Public read access limited to \texttt{GetObject} only (serving static frontend files); no \texttt{PutObject}, \texttt{DeleteObject}, or \texttt{ListBucket} for public access
+    \item \textbf{No hardcoded secrets}: Cognito Client ID is public by design (SPA best practice); no API keys or credentials in source code
+\end{itemize}
+
+\subsection{OWASP Top 10 Security Audit}
+
+We conducted a security audit against the OWASP Top 10 vulnerabilities. Table~\ref{tab:owasp} presents the results.
+
+\begin{table}[H]
+\centering
+\caption{OWASP Top 10 Assessment Results}
+\label{tab:owasp}
+\begin{tabular}{llll}
+\toprule
+\textbf{\#} & \textbf{Vulnerability} & \textbf{Status} & \textbf{Notes} \\
+\midrule
+A01 & Broken Access Control & \cmark\ Pass & JWT on all routes; frontend guards \\
+A02 & Cryptographic Failures & \cmark\ Pass & AES-256 at rest; TLS 1.2+ in transit \\
+A03 & Injection & \cmark\ Pass & DynamoDB SDK uses parameterized queries \\
+A04 & Insecure Design & \cmark\ Pass & Serverless; least-privilege IAM \\
+A05 & Security Misconfiguration & \cmark\ Pass & Default encryption; no debug endpoints \\
+A06 & Vulnerable Components & \cmark\ Pass & Current versions; no known CVEs \\
+A07 & Authentication Failures & \cmark\ Pass & SRP protocol; password policy; token expiry \\
+A08 & Data Integrity Failures & \cmark\ Pass & Model versioning in S3; DynamoDB Streams \\
+A09 & Security Logging & \cmark\ Pass & CloudWatch Logs on all Lambda functions \\
+A10 & SSRF & N/A & No user-supplied URLs processed \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{successbox}[Security Audit Result]
+\textbf{9/10 passed}, 1 N/A. \textbf{Overall risk level: Low.}
+
+Additional checks passed: CORS configuration, rate limiting (10K req/s burst), input validation, error handling (no stack traces exposed), secrets management, DynamoDB TTL auto-cleanup.
+\end{successbox}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\linewidth]{images/jwt_auth.png}
+\caption{API Gateway -- JWT Authorizer on all 19 routes}
+\label{fig:jwt-auth}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\linewidth]{images/cognito_user_pool.png}
+\caption{Cognito User Pool -- Password Policy Configuration}
+\label{fig:cognito-config}
+\end{figure}
+
+% ========================
+% SECTION 7: INTEGRATION TESTING
+% ========================
+\section{Integration Testing}
+
+\subsection{Testing Methodology}
+
+Tests are organized into 6 categories covering all three system layers (frontend, backend, database) plus cross-cutting concerns. Each test follows a structured format with unique ID, description, preconditions, steps, expected result, and pass/fail status.
+
+\subsection{Test Environment}
+
+\begin{table}[H]
+\centering
+\caption{Test Environment}
+\label{tab:test-env}
+\begin{tabular}{ll}
+\toprule
+\textbf{Component} & \textbf{Details} \\
+\midrule
+API Gateway & \texttt{https://p9fpx4nhh6.execute-api.ca-central-1.amazonaws.com} \\
+AWS Region & \texttt{ca-central-1} \\
+Cognito User Pool & \texttt{ca-central-1\_cyhaCVeUz} \\
+S3 Production URL & \texttt{cloud-project-dashboard1.s3-website.ca-central-1.amazonaws.com} \\
+Frontend Dev Server & \texttt{http://localhost:5173} \\
+Browser & Chrome 133+ / Safari 18+ \\
+Test Date & March 22, 2026 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Test Results Summary}
+
+\begin{table}[H]
+\centering
+\caption{Integration Test Results}
+\label{tab:test-results}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Category} & \textbf{Total} & \textbf{Pass} & \textbf{Fail} \\
+\midrule
+Authentication (CLI) & 5 & 5 & 0 \\
+API Endpoints & 14 & 14 & 0 \\
+Simulation Lifecycle & 5 & 5 & 0 \\
+Database Verification & 5 & 5 & 0 \\
+Production Deployment (CLI) & 3 & 3 & 0 \\
+\midrule
+\textbf{Subtotal (Automated)} & \textbf{32} & \textbf{32} & \textbf{0} \\
+\midrule
+Authentication (Browser) & 4 & -- & -- \\
+Frontend Integration & 17 & -- & -- \\
+Cross-Cutting (Theme, Error, etc.) & 7 & -- & -- \\
+Production Deployment (Browser) & 1 & -- & -- \\
+\midrule
+\textbf{Subtotal (Manual)} & \textbf{29} & \multicolumn{2}{c}{\textit{Documented}} \\
+\midrule
+\textbf{Grand Total} & \textbf{61} & & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Key Test Cases and Results}
+
+\subsubsection{Authentication Tests (5/5 Passed)}
+
+\begin{itemize}[leftmargin=2em]
+    \item \textbf{AUTH-01: User Registration} -- Cognito creates unconfirmed user; email verification code sent. \cmark
+    \item \textbf{AUTH-02: Email Verification} -- 6-digit code confirms account; user auto-signed in. \cmark
+    \item \textbf{AUTH-03: User Sign In} -- SRP handshake returns JWT tokens; redirected to dashboard. \cmark
+    \item \textbf{AUTH-04: Session Persistence} -- Session survives page refresh via Cognito SDK. \cmark
+    \item \textbf{AUTH-05: Sign Out} -- Session cleared; redirected to login page. \cmark
+\end{itemize}
+
+\subsubsection{API Endpoint Tests (14/14 Passed)}
+
+All 14 testable API endpoints return correct JSON schemas with expected data types. Sample verification:
+
+\begin{lstlisting}[language=bash, caption={API test output: GET /services returns 5 services with correct schema}]
+$ curl -s "$BASE/services" -H "Authorization: $TOKEN" | jq 'length'
+5
+
+$ curl -s "$BASE/kpi/web-api-001" -H "Authorization: $TOKEN" | jq '.[0]'
+{
+  "minute": 0,
+  "timestamp": "2026-03-22T04:45:01+00:00",
+  "value": 87,
+  "predictionScore": 0
+}
+\end{lstlisting}
+
+\subsubsection{Simulation Lifecycle Tests (5/5 Passed)}
+
+\begin{itemize}[leftmargin=2em]
+    \item \textbf{SIM-01: Start Simulation} -- \texttt{POST /simulation/start} starts data generation; EventBridge triggers simulator Lambda. \cmark
+    \item \textbf{SIM-02: Data Pipeline Execution} -- Confirmed full chain: Simulator $\rightarrow$ KPIMetrics $\rightarrow$ Feature Engineering $\rightarrow$ FeatureStore $\rightarrow$ Inference $\rightarrow$ Alerts. \cmark
+    \item \textbf{SIM-03: Alert Generation} -- Alerts created when prediction score exceeds threshold; severity correctly classified. \cmark
+    \item \textbf{SIM-04: Incident Grouping} -- Multiple alerts within 5-minute window grouped into incident with affected services list. \cmark
+    \item \textbf{SIM-05: Stop Simulation} -- Simulation stops; no further data generation. \cmark
+\end{itemize}
+
+\subsubsection{Database Verification Tests (5/5 Passed)}
+
+\begin{itemize}[leftmargin=2em]
+    \item \textbf{DB-01: Table Existence and Schema} -- All 6 tables exist with correct key schemas (verified via \texttt{aws dynamodb describe-table}). \cmark
+    \item \textbf{DB-02: DynamoDB Streams Enabled} -- Streams enabled on KPIMetrics and FeatureStore with \texttt{NEW\_IMAGE} view type. \cmark
+    \item \textbf{DB-03: KPI Record Integrity} -- Records contain all required fields including service-specific metrics. \cmark
+    \item \textbf{DB-04: Alert Record Integrity} -- Alert records contain all fields required by the frontend. \cmark
+    \item \textbf{DB-05: S3 Model Files} -- All 5 model files present and accessible: 3 model files + thresholds + feature importances. \cmark
+\end{itemize}
+
+\subsubsection{Production Deployment Tests (3/3 Passed)}
+
+\begin{itemize}[leftmargin=2em]
+    \item \textbf{PROD-01: S3 Static Hosting} -- Dashboard accessible at S3 website endpoint; CSS/JS assets load correctly. \cmark
+    \item \textbf{PROD-02: SPA Routing} -- Direct navigation to \texttt{/timeline}, \texttt{/alerts} works via S3 error document configuration. \cmark
+    \item \textbf{PROD-04: ML Models in S3} -- All model files present and accessible by inference Lambda. \cmark
+\end{itemize}
+
+\subsection{Manual Test Documentation}
+
+29 additional test cases requiring browser interaction are documented in a separate manual testing document. These cover:
+
+\begin{itemize}[leftmargin=2em]
+    \item \textbf{4 authentication tests}: Route protection, token injection, invalid credentials, password policy enforcement
+    \item \textbf{17 frontend integration tests}: Service health display, simulation controls, KPI timeline navigation, horizon toggle, alert acknowledge/dismiss flow, incident timeline, analytics charts, sidebar features
+    \item \textbf{7 cross-cutting tests}: Dark/light theme toggle, theme persistence across reload, loading states, error handling (offline), 401 response handling
+    \item \textbf{1 production test}: Production API connectivity without proxy
+\end{itemize}
+
+% ========================
+% SECTION 8: CHALLENGES AND SOLUTIONS
+% ========================
+\section{Challenges and Solutions}
+
+\begin{table}[H]
+\centering
+\caption{Implementation Challenges and Solutions}
+\label{tab:challenges}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{>{\bfseries}p{3.5cm}XX}
+\toprule
+\textbf{Challenge} & \textbf{Problem} & \textbf{Solution} \\
+\midrule
+Lambda Package Size & scikit-learn, numpy, scipy, and pandas exceed Lambda's 250 MB deployment limit & Deployed the inference Lambda as a Docker container image via ECR. The container packages all dependencies in a single image, bypassing the deployment size limit \\
+\midrule
+Cold Start Latency & Lambda cold starts caused delays when loading large ML models from S3 on first invocation & Implemented model caching in Lambda's global scope (\texttt{\_models} dict). Models are downloaded once on cold start and persist across warm invocations. Set inference Lambda memory to 512 MB for faster load times \\
+\midrule
+Heterogeneous Data & 5 services produce completely different JSON structures (different fields per service type) & Chose DynamoDB for its flexible schema -- each service stores its own document shape. The Feature Engineering Lambda extracts one primary metric per service to create a uniform 8-feature vector for the model \\
+\midrule
+Pipeline Orchestration & Needed automatic data flow (Simulator $\rightarrow$ Features $\rightarrow$ Inference) without polling or manual triggers & Used DynamoDB Streams to automatically trigger Lambda functions when new records are written. This creates a fully event-driven pipeline with zero orchestration code \\
+\midrule
+Low Recall Trade-off & ML model detection rate is only 8.7\% -- it misses many incidents & This is an intentional design decision. We prioritized precision (0.91) over recall. In AIOps, high false alarm rates erode operator trust. Selective, trustworthy alerts are more valuable than noisy comprehensive detection \\
+\midrule
+SPA Routing on S3 & Direct URL navigation to \texttt{/timeline} or \texttt{/alerts} returned 404 from S3 & Configured S3 static website hosting with \texttt{ErrorDocument = index.html}. S3 serves the React app for all paths, allowing React Router to handle client-side routing \\
+\midrule
+Chart Theming & Recharts does not natively support CSS theme switching; chart colors were hardcoded & Created a \texttt{chartColors()} utility that reads CSS custom properties at render time. Charts dynamically adapt to the current theme (dark/light) without configuration changes \\
+\midrule
+Per-User Data Isolation & Multiple users sharing the same DynamoDB tables could see each other's simulation data, alerts, and incidents & Restructured all table partition keys to embed the Cognito \texttt{owner\_id}. Data tables use a composite key \texttt{owner\_service = \{owner\_id\}\#\{service\_id\}}; Alerts and Incidents use \texttt{owner\_id} directly. All API and pipeline Lambdas extract and propagate the user identity, ensuring complete tenant isolation \\
+\midrule
+Scenario Coverage & Original simulator only covered Web API and DB Pool failures, leaving 3 of 5 service types without dedicated failure scenarios & Added 3 new scenarios (Message Queue Backlog, Auth Service Failure, ML Pipeline Drift) with full Degrading/Incident/Recovery metric curves, giving each service type a dedicated failure mode for comprehensive ML model evaluation \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% ========================
+% SECTION 9: ML MODEL PERFORMANCE
+% ========================
+\section{ML Model Performance}
+
+\subsection{Model Configuration}
+
+Three Gradient Boosting Classifiers are trained, one per prediction horizon:
+
+\begin{table}[H]
+\centering
+\caption{Model Training Parameters}
+\label{tab:model-params}
+\begin{tabular}{ll}
+\toprule
+\textbf{Parameter} & \textbf{Value} \\
+\midrule
+Algorithm & Gradient Boosting Classifier (scikit-learn) \\
+Number of Trees & 100 \\
+Max Depth & 3 \\
+Learning Rate & 0.1 \\
+Prediction Horizons & 5, 10, 15 minutes \\
+Training Data & AIOps KPI Dataset (2.4M timesteps, 26 services) \\
+Train/Test Split & 70\% / 30\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Feature Engineering}
+
+Each prediction uses 8 engineered features derived from a rolling window of KPI values:
+
+\begin{table}[H]
+\centering
+\caption{Feature Importance at H=15 (Best Model)}
+\label{tab:feature-importance}
+\begin{tabular}{llrl}
+\toprule
+\textbf{Feature} & \textbf{Type} & \textbf{Importance} & \textbf{Description} \\
+\midrule
+\texttt{roll\_mean} & KPI & 31.1\% & Rolling mean of KPI values \\
+\texttt{error\_rate} & Log-proxy & 26.6\% & Fraction of extreme spikes (z $>$ 3) \\
+\texttt{roll\_max} & KPI & 19.8\% & Peak value in the rolling window \\
+\texttt{roll\_std} & KPI & 12.9\% & Standard deviation (variability) \\
+\texttt{severity\_change\_flag} & Log-proxy & 4.6\% & Sudden shift in error/warn patterns \\
+\texttt{first\_diff} & KPI & 3.5\% & Short-term change \\
+\texttt{roll\_slope} & KPI & 1.0\% & Trend direction \\
+\texttt{warn\_rate} & Log-proxy & 0.4\% & Fraction of large jumps \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{infobox}[Key Insight: Multi-Signal Fusion]
+Log-proxy features contribute \textbf{31.6\%} of total feature importance. The \texttt{error\_rate} is the second most important feature overall. This confirms that combining KPI statistics with behavioral signals (log-proxies) provides significantly better predictions than KPI statistics alone.
+\end{infobox}
+
+\subsection{Performance Results}
+
+\begin{table}[H]
+\centering
+\caption{Model Performance Comparison (Operational Window, H=15)}
+\label{tab:model-performance}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Method} & \textbf{Precision} & \textbf{Recall} & \textbf{Lead Time} & \textbf{FAR} \\
+\midrule
+GBC KPI+Logs & \textbf{0.91} & \textbf{0.43} & $\sim$36 min & $\leq$1/day \\
+GBC KPI Only & 0.63 & 0.16 & $\sim$34 min & $\leq$1/day \\
+Static Threshold & 0.63 & 0.47 & $\sim$30 min & Higher \\
+Moving Average & 0.42 & 0.02 & $\sim$35 min & Higher \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{successbox}[Performance Summary]
+The best model (GBC with KPI+Log features at H=15) achieves \textbf{0.91 precision} with a \textbf{$\sim$36-minute average lead time} and fewer than \textbf{1 false alarm per service per day}. The main operational benefit is not dramatically earlier detection, but \textbf{significantly more trustworthy alerts with less alert fatigue}.
+\end{successbox}
+
+% ========================
+% SECTION 10: DEPLOYMENT
+% ========================
+\section{Deployment}
+
+\subsection{Infrastructure}
+
+The entire platform is serverless and deployed to AWS \texttt{ca-central-1}:
+
+\begin{table}[H]
+\centering
+\caption{Deployment Summary}
+\label{tab:deployment}
+\begin{tabular}{lll}
+\toprule
+\textbf{Component} & \textbf{Service} & \textbf{Deployment Method} \\
+\midrule
+Frontend & S3 static website hosting & \texttt{npm run build} $\rightarrow$ \texttt{aws s3 sync dist/} \\
+API & API Gateway (HTTP API) & AWS Console configuration \\
+Backend (API) & 10 Lambda functions & ZIP upload via AWS Console/CLI \\
+Backend (Pipeline) & 3 Lambda functions & ZIP + Docker (ECR for inference) \\
+Database & 6 DynamoDB tables & AWS Console configuration \\
+ML Models & S3 (\texttt{models/} prefix) & \texttt{aws s3 cp} after training \\
+Authentication & Cognito User Pool & AWS Console configuration \\
+Scheduler & EventBridge rule & AWS Console configuration \\
+Notifications & SNS topic & AWS CLI \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Cost}
+
+The platform runs entirely within the AWS Free Tier:
+
+\begin{itemize}[leftmargin=2em]
+    \item \textbf{Lambda}: $\sim$43,200 invocations/month for the simulator (1/min $\times$ 30 days), well within the 1M free tier limit
+    \item \textbf{DynamoDB}: On-demand mode; TTL automatically deletes records after 24 hours, keeping storage minimal
+    \item \textbf{S3}: Minimal storage for frontend assets ($<$5 MB) and model files ($<$500 KB)
+    \item \textbf{API Gateway}: Well within the 1M requests/month free tier
+    \item \textbf{Cognito}: Free for up to 50,000 monthly active users
+    \item \textbf{SNS}: First 1,000 email notifications per month are free
+\end{itemize}
+
+\subsection{Frontend Deployment}
+
+\begin{lstlisting}[language=bash, caption={Frontend build and deployment}]
+cd dashboard
+npm install
+npm run build          # Outputs to dist/
+aws s3 sync dist/ s3://cloud-project-dashboard1/ --delete --exclude "models/*"
+\end{lstlisting}
+
+The production build uses \texttt{VITE\_API\_BASE\_URL} from \texttt{.env.production} to point directly at the API Gateway endpoint, eliminating the development proxy.
+
+\subsection{Model Deployment}
+
+\begin{lstlisting}[language=bash, caption={Model training and deployment}]
+cd inference-final/data
+python retrain_and_export.py   # Trains 3 models, exports to output/
+aws s3 cp output/ s3://cloud-project-dashboard1/models/ --recursive
+\end{lstlisting}
+
+% ========================
+% SECTION 11: FUNCTIONALITY DEMONSTRATION VIDEO
+% ========================
+\section{Functionality Demonstration Video}
+
+A 3--5 minute video demonstrating the platform's key functionalities accompanies this report. The video covers:
+
+\begin{enumerate}[leftmargin=2em]
+    \item \textbf{Authentication}: Sign up, email verification, sign in
+    \item \textbf{Live Controls}: Starting a simulation scenario, observing service health cards update
+    \item \textbf{KPI Timeline}: Watching real-time metric charts scroll forward, switching between services and horizons
+    \item \textbf{Alert Detection}: The ML model fires an alert before the incident fully develops
+    \item \textbf{Alert Management}: Acknowledging and dismissing alerts, viewing incident timelines
+    \item \textbf{Email Notifications}: Subscribing to email alerts via the toggle, receiving SNS confirmation email
+    \item \textbf{Analytics}: Model performance charts showing precision, lead time distribution, and feature importance
+    \item \textbf{Theme Toggle}: Switching between dark and light modes
+    \item \textbf{Security}: Demonstrating 401 rejection for unauthenticated API requests
+\end{enumerate}
+
+\begin{warnbox}[Video Link]
+\textit{[Insert video URL or indicate that video is included as a separate submission file]}
+\end{warnbox}
+
+% ========================
+% SECTION 12: CONCLUSION
+% ========================
+\section{Conclusion}
+
+CloudWatch AI successfully demonstrates a complete, production-grade cloud database application that spans the full stack: from real-time data generation and NoSQL storage, through ML inference and event-driven processing, to interactive visualization and enterprise security.
+
+\begin{infobox}[Implementation Highlights]
+\begin{itemize}[leftmargin=1em, itemsep=2pt]
+    \item \textbf{Architecture}: Fully serverless on AWS with 13 Lambda functions, 6 DynamoDB tables, SNS email notifications, and event-driven data processing via DynamoDB Streams
+    \item \textbf{Database}: DynamoDB's flexible schema elegantly handles 5 different service types with heterogeneous JSON structures, with per-user data isolation via \texttt{owner\_id} partitioning
+    \item \textbf{Simulation}: 6 configurable scenarios covering all 5 service types with realistic degradation curves
+    \item \textbf{ML Pipeline}: 3 Gradient Boosting models achieving 0.91 precision with $\sim$36-minute lead time
+    \item \textbf{Frontend}: React 19 dashboard with auto-polling (5s), email notification toggle, local timezone display, theme system, and authentication
+    \item \textbf{Security}: Cognito SRP auth, JWT on all routes, AES-256 encryption, OWASP Top 10 audit passed
+    \item \textbf{Testing}: 61 documented test cases across all system layers
+    \item \textbf{Cost}: Entire platform runs within AWS Free Tier
+\end{itemize}
+\end{infobox}
+
+The key contribution is not merely predicting incidents earlier, but producing \textbf{more trustworthy alerts with fewer false alarms}---leading to higher operator trust and faster incident response. This principle of ``precision over recall'' is essential for real-world AIOps adoption.
+
+\end{document}

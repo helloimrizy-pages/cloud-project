@@ -1,0 +1,97 @@
+[
+    {
+        "RouteKey": "GET /notifications/status",
+        "AuthorizationType": "JWT",
+        "Target": "integrations/idg83w1"
+    },
+    {
+        "RouteKey": "GET /analytics/summary",
+        "AuthorizationType": "JWT",
+        "Target": "integrations/in9qpmr"
+    },
+    {
+        "RouteKey": "POST /notifications/subscribe",
+        "AuthorizationType": "JWT",
+        "Target": "integrations/idg83w1"
+    },
+    {
+        "RouteKey": "POST /alerts/{id}/acknowledge",
+        "AuthorizationType": "JWT",
+        "Target": "integrations/tatdebn"
+    },
+    {
+        "RouteKey": "POST /simulation/stop",
+        "AuthorizationType": "JWT",
+        "Target": "integrations/f8clfk4"
+    },
+    {
+        "RouteKey": "GET /alerts/active",
+        "AuthorizationType": "JWT",
+        "Target": "integrations/39iwjo3"
+    },
+    {
+        "RouteKey": "GET /analytics/methods",
+        "AuthorizationType": "JWT",
+        "Target": "integrations/in9qpmr"
+    },
+    {
+        "RouteKey": "GET /metrics",
+        "AuthorizationType": "JWT",
+        "Target": "integrations/laidz6q"
+    },
+    {
+        "RouteKey": "GET /kpi/{serviceId}",
+        "AuthorizationType": "JWT",
+        "Target": "integrations/b86dy2v"
+    },
+    {
+        "RouteKey": "POST /simulation/start",
+        "AuthorizationType": "JWT",
+        "Target": "integrations/f8clfk4"
+    },
+    {
+        "RouteKey": "GET /thresholds",
+        "AuthorizationType": "JWT",
+        "Target": "integrations/twnnymb"
+    },
+    {
+        "RouteKey": "GET /analytics/lead-times",
+        "AuthorizationType": "JWT",
+        "Target": "integrations/in9qpmr"
+    },
+    {
+        "RouteKey": "GET /incidents",
+        "AuthorizationType": "JWT",
+        "Target": "integrations/1f5kovf"
+    },
+    {
+        "RouteKey": "POST /notifications/unsubscribe",
+        "AuthorizationType": "JWT",
+        "Target": "integrations/idg83w1"
+    },
+    {
+        "RouteKey": "GET /services",
+        "AuthorizationType": "JWT",
+        "Target": "integrations/25xecr9"
+    },
+    {
+        "RouteKey": "GET /simulation/state",
+        "AuthorizationType": "JWT",
+        "Target": "integrations/f8clfk4"
+    },
+    {
+        "RouteKey": "GET /alerts/history",
+        "AuthorizationType": "JWT",
+        "Target": "integrations/anmilul"
+    },
+    {
+        "RouteKey": "GET /logs",
+        "AuthorizationType": "JWT",
+        "Target": "integrations/tdg9u0f"
+    },
+    {
+        "RouteKey": "GET /analytics/features",
+        "AuthorizationType": "JWT",
+        "Target": "integrations/in9qpmr"
+    }
+]

@@ -1,5 +1,15 @@
 .DS_Store
+.venv/
+.claude/
 
-# large datasets
+# Large datasets
 KPI-Anomaly-Detection-master/
 sklearn-layer/
+ml/data/train.csv
+
+# Build outputs
+dashboard/node_modules/
+dashboard/dist/
+
+# ML model artifacts (large binaries)
+ml/output/*.pkl

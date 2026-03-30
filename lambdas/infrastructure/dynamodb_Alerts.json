@@ -1,0 +1,60 @@
+{
+    "TableName": "Alerts",
+    "KeySchema": [
+        {
+            "AttributeName": "owner_id",
+            "KeyType": "HASH"
+        },
+        {
+            "AttributeName": "created_at",
+            "KeyType": "RANGE"
+        }
+    ],
+    "AttributeDefinitions": [
+        {
+            "AttributeName": "created_at",
+            "AttributeType": "S"
+        },
+        {
+            "AttributeName": "owner_id",
+            "AttributeType": "S"
+        },
+        {
+            "AttributeName": "owner_status",
+            "AttributeType": "S"
+        }
+    ],
+    "GlobalSecondaryIndexes": [
+        {
+            "IndexName": "GSI_AlertsByOwnerStatus",
+            "KeySchema": [
+                {
+                    "AttributeName": "owner_status",
+                    "KeyType": "HASH"
+                },
+                {
+                    "AttributeName": "created_at",
+                    "KeyType": "RANGE"
+                }
+            ],
+            "Projection": {
+                "ProjectionType": "ALL"
+            },
+            "IndexStatus": "ACTIVE",
+            "ProvisionedThroughput": {
+                "NumberOfDecreasesToday": 0,
+                "ReadCapacityUnits": 0,
+                "WriteCapacityUnits": 0
+            },
+            "IndexSizeBytes": 4012,
+            "ItemCount": 10,
+            "IndexArn": "arn:aws:dynamodb:ca-central-1:052808603722:table/Alerts/index/GSI_AlertsByOwnerStatus",
+            "WarmThroughput": {
+                "ReadUnitsPerSecond": 12000,
+                "WriteUnitsPerSecond": 4000,
+                "Status": "ACTIVE"
+            }
+        }
+    ],
+    "StreamSpecification": null
+}

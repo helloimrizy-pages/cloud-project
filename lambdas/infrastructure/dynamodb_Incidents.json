@@ -1,0 +1,25 @@
+{
+    "TableName": "Incidents",
+    "KeySchema": [
+        {
+            "AttributeName": "owner_id",
+            "KeyType": "HASH"
+        },
+        {
+            "AttributeName": "created_at",
+            "KeyType": "RANGE"
+        }
+    ],
+    "AttributeDefinitions": [
+        {
+            "AttributeName": "created_at",
+            "AttributeType": "S"
+        },
+        {
+            "AttributeName": "owner_id",
+            "AttributeType": "S"
+        }
+    ],
+    "GlobalSecondaryIndexes": null,
+    "StreamSpecification": null
+}

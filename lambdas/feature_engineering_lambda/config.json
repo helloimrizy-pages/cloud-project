@@ -1,0 +1,13 @@
+{
+    "FunctionName": "feature_engineering_lambda",
+    "Runtime": "python3.11",
+    "Handler": "lambda_function.lambda_handler",
+    "Timeout": 30,
+    "MemorySize": 256,
+    "Environment": {
+        "FEATURE_TABLE": "FeatureStore",
+        "SIM_TABLE": "SimConfig",
+        "KPI_TABLE": "KPIMetrics"
+    },
+    "PackageType": "Zip"
+}

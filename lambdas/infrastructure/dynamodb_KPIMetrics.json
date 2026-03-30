@@ -1,0 +1,28 @@
+{
+    "TableName": "KPIMetrics",
+    "KeySchema": [
+        {
+            "AttributeName": "owner_service",
+            "KeyType": "HASH"
+        },
+        {
+            "AttributeName": "timestamp",
+            "KeyType": "RANGE"
+        }
+    ],
+    "AttributeDefinitions": [
+        {
+            "AttributeName": "owner_service",
+            "AttributeType": "S"
+        },
+        {
+            "AttributeName": "timestamp",
+            "AttributeType": "S"
+        }
+    ],
+    "GlobalSecondaryIndexes": null,
+    "StreamSpecification": {
+        "StreamEnabled": true,
+        "StreamViewType": "NEW_IMAGE"
+    }
+}

@@ -1,0 +1,12 @@
+{
+    "FunctionName": "notifications_lambda",
+    "Runtime": "python3.12",
+    "Handler": "lambda_function.lambda_handler",
+    "Timeout": 15,
+    "MemorySize": 128,
+    "Environment": {
+        "SNS_TOPIC_ARN": "arn:aws:sns:ca-central-1:052808603722:CloudWatchAI-Alerts",
+        "USER_POOL_ID": "ca-central-1_cyhaCVeUz"
+    },
+    "PackageType": "Zip"
+}

@@ -1,0 +1,25 @@
+{
+    "TableName": "SimConfig",
+    "KeySchema": [
+        {
+            "AttributeName": "owner_id",
+            "KeyType": "HASH"
+        },
+        {
+            "AttributeName": "config_key",
+            "KeyType": "RANGE"
+        }
+    ],
+    "AttributeDefinitions": [
+        {
+            "AttributeName": "config_key",
+            "AttributeType": "S"
+        },
+        {
+            "AttributeName": "owner_id",
+            "AttributeType": "S"
+        }
+    ],
+    "GlobalSecondaryIndexes": null,
+    "StreamSpecification": null
+}

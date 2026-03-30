@@ -1,0 +1,16 @@
+{
+    "FunctionName": "inference_lambda",
+    "Runtime": null,
+    "Handler": null,
+    "Timeout": 60,
+    "MemorySize": 512,
+    "Environment": {
+        "SNS_TOPIC_ARN": "arn:aws:sns:ca-central-1:052808603722:CloudWatchAI-Alerts",
+        "SIM_TABLE": "SimConfig",
+        "MODEL_BUCKET": "cloud-project-dashboard1",
+        "INCIDENTS_TABLE": "Incidents",
+        "ALERTS_TABLE": "Alerts",
+        "KPI_TABLE": "KPIMetrics"
+    },
+    "PackageType": "Image"
+}

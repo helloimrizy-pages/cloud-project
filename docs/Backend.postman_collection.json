@@ -1,0 +1,919 @@
+{
+  "info": {
+    "_postman_id": "6db4aa13-cb0d-4a44-8fcd-e7ddfff13f4d",
+    "name": "Backend",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "21394993",
+    "_collection_link": "https://go.postman.co/collection/21394993-6db4aa13-cb0d-4a44-8fcd-e7ddfff13f4d?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Simulation State",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/simulation/state",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "simulation",
+            "state"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/simulation/state",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "simulation",
+                "state"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": null,
+          "header": [
+            {
+              "key": "Date",
+              "value": "Thu, 19 Mar 2026 21:10:28 GMT"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Content-Length",
+              "value": "122"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Apigw-Requestid",
+              "value": "afTqljVWYosEMzg="
+            }
+          ],
+          "cookie": [],
+          "body": "{\n    \"scenario\": \"baseline\",\n    \"phase\": \"Stopped\",\n    \"tick\": 14,\n    \"totalTicks\": 15,\n    \"predictionsProcessed\": 0,\n    \"status\": \"stopped\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Simulation Start",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/simulation/start",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "simulation",
+            "start"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/simulation/start",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "simulation",
+                "start"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": null,
+          "header": [
+            {
+              "key": "Date",
+              "value": "Thu, 19 Mar 2026 21:15:22 GMT"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Content-Length",
+              "value": "33"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Apigw-Requestid",
+              "value": "afUYqjkiYosEJrA="
+            }
+          ],
+          "cookie": [],
+          "body": "{\n    \"message\": \"Simulation started\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Simulation Stop",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/simulation/stop",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "simulation",
+            "stop"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/simulation/stop",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "simulation",
+                "stop"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": null,
+          "header": [
+            {
+              "key": "Date",
+              "value": "Thu, 19 Mar 2026 21:17:23 GMT"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Content-Length",
+              "value": "33"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Apigw-Requestid",
+              "value": "afUrrhJG4osEJ9Q="
+            }
+          ],
+          "cookie": [],
+          "body": "{\n    \"message\": \"Simulation stopped\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Get Services",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/services",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "services"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/services",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "services"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": null,
+          "header": [
+            {
+              "key": "Date",
+              "value": "Thu, 19 Mar 2026 22:01:47 GMT"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Content-Length",
+              "value": "813"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Apigw-Requestid",
+              "value": "afbLyhRk4osEN2A="
+            }
+          ],
+          "cookie": [],
+          "body": "[\n    {\n        \"id\": \"auth-001\",\n        \"name\": \"Auth Service\",\n        \"type\": \"Authentication\",\n        \"status\": \"critical\",\n        \"metricName\": \"Auth Latency\",\n        \"metricUnit\": \"ms\",\n        \"currentValue\": 160\n    },\n    {\n        \"id\": \"db-pool-001\",\n        \"name\": \"DB Pool\",\n        \"type\": \"Database Pool\",\n        \"status\": \"warning\",\n        \"metricName\": \"Query Duration\",\n        \"metricUnit\": \"ms\",\n        \"currentValue\": 76\n    },\n    {\n        \"id\": \"ml-pipeline-001\",\n        \"name\": \"ML Pipeline\",\n        \"type\": \"ML Service\",\n        \"status\": \"healthy\",\n        \"metricName\": \"Inference Latency\",\n        \"metricUnit\": \"ms\",\n        \"currentValue\": 114\n    },\n    {\n        \"id\": \"mq-001\",\n        \"name\": \"Message Queue\",\n        \"type\": \"Message Queue\",\n        \"status\": \"healthy\",\n        \"metricName\": \"Queue Depth\",\n        \"metricUnit\": \"messages\",\n        \"currentValue\": 69\n    },\n    {\n        \"id\": \"web-api-001\",\n        \"name\": \"Web API\",\n        \"type\": \"API Gateway\",\n        \"status\": \"healthy\",\n        \"metricName\": \"Response Time\",\n        \"metricUnit\": \"ms\",\n        \"currentValue\": 85\n    }\n]"
+        }
+      ]
+    },
+    {
+      "name": "Get Thresholds",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/thresholds",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "thresholds"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/thresholds",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "thresholds"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": null,
+          "header": [
+            {
+              "key": "Date",
+              "value": "Fri, 20 Mar 2026 06:57:04 GMT"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Content-Length",
+              "value": "38"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Apigw-Requestid",
+              "value": "agpmHjuM4osEMoQ="
+            }
+          ],
+          "cookie": [],
+          "body": "{\n    \"5\": 0.912,\n    \"10\": 0.867,\n    \"15\": 0.847\n}"
+        }
+      ]
+    },
+    {
+      "name": "Get KPI Data",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/kpi/web-api-001",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "kpi",
+            "web-api-001"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/kpi/web-api-001",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kpi",
+                "web-api-001"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": null,
+          "header": [
+            {
+              "key": "Date",
+              "value": "Fri, 20 Mar 2026 06:36:54 GMT"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Content-Length",
+              "value": "187"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Apigw-Requestid",
+              "value": "agmpEjLpYosEMgA="
+            }
+          ],
+          "cookie": [],
+          "body": "[\n    {\n        \"minute\": 14,\n        \"timestamp\": \"2026-03-19T21:16:00+00:00\",\n        \"value\": 241,\n        \"predictionScore\": 0\n    },\n    {\n        \"minute\": 15,\n        \"timestamp\": \"2026-03-19T21:17:00+00:00\",\n        \"value\": 85,\n        \"predictionScore\": 0\n    }\n]"
+        }
+      ]
+    },
+    {
+      "name": "Get Active Alerts",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/alerts/active",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "alerts",
+            "active"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/alerts/active",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "alerts",
+                "active"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": null,
+          "header": [
+            {
+              "key": "Date",
+              "value": "Fri, 20 Mar 2026 06:42:58 GMT"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Content-Length",
+              "value": "2"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Apigw-Requestid",
+              "value": "agnh5g1B4osEMkA="
+            }
+          ],
+          "cookie": [],
+          "body": "[]"
+        }
+      ]
+    },
+    {
+      "name": "Get Alert History",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/alerts/history",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "alerts",
+            "history"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/alerts/history",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "alerts",
+                "history"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": null,
+          "header": [
+            {
+              "key": "Date",
+              "value": "Fri, 20 Mar 2026 06:43:33 GMT"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Content-Length",
+              "value": "2"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Apigw-Requestid",
+              "value": "agnnXjb1YosEM8A="
+            }
+          ],
+          "cookie": [],
+          "body": "[]"
+        }
+      ]
+    },
+    {
+      "name": "Get Incidents",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/incidents",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "incidents"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/incidents",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "incidents"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": null,
+          "header": [
+            {
+              "key": "Date",
+              "value": "Fri, 20 Mar 2026 06:45:20 GMT"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Content-Length",
+              "value": "2"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Apigw-Requestid",
+              "value": "agn4Ih3j4osEJrA="
+            }
+          ],
+          "cookie": [],
+          "body": "[]"
+        }
+      ]
+    },
+    {
+      "name": "Get Analytics Summary",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/analytics/summary",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "analytics",
+            "summary"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/analytics/summary",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "analytics",
+                "summary"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": null,
+          "header": [
+            {
+              "key": "Date",
+              "value": "Fri, 20 Mar 2026 06:48:52 GMT"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Content-Length",
+              "value": "98"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Apigw-Requestid",
+              "value": "agoZKhyP4osEMDw="
+            }
+          ],
+          "cookie": [],
+          "body": "{\n    \"bestPrecision\": 0.91,\n    \"meanLeadTime\": 36,\n    \"falseAlarmRate\": \"≤1/day\",\n    \"detectionRate\": 8.7\n}"
+        }
+      ]
+    },
+    {
+      "name": "Get Analytics Methods",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/analytics/methods",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "analytics",
+            "methods"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/analytics/methods",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "analytics",
+                "methods"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": null,
+          "header": [
+            {
+              "key": "Date",
+              "value": "Fri, 20 Mar 2026 06:49:25 GMT"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Content-Length",
+              "value": "144"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Apigw-Requestid",
+              "value": "agoeeiY5YosEJkg="
+            }
+          ],
+          "cookie": [],
+          "body": "[\n    {\n        \"name\": \"GBC + Logs\",\n        \"precision\": {\n            \"5\": 0.88,\n            \"10\": 0.9,\n            \"15\": 0.91\n        },\n        \"detectionRate\": {\n            \"5\": 5.2,\n            \"10\": 7.1,\n            \"15\": 8.7\n        },\n        \"color\": \"#64ffda\"\n    }\n]"
+        }
+      ]
+    },
+    {
+      "name": "Get Analytics Features",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/analytics/features",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "analytics",
+            "features"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/analytics/features",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "analytics",
+                "features"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": null,
+          "header": [
+            {
+              "key": "Date",
+              "value": "Fri, 20 Mar 2026 06:50:03 GMT"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Content-Length",
+              "value": "122"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Apigw-Requestid",
+              "value": "agokRjN-YosEJag="
+            }
+          ],
+          "cookie": [],
+          "body": "[\n    {\n        \"feature\": \"roll_std\",\n        \"importance\": 0.32,\n        \"type\": \"kpi\"\n    },\n    {\n        \"feature\": \"error_rate\",\n        \"importance\": 0.27,\n        \"type\": \"log\"\n    }\n]"
+        }
+      ]
+    },
+    {
+      "name": "Get Analytics Lead Times",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/analytics/lead-times",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "analytics",
+            "lead-times"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/analytics/lead-times",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "analytics",
+                "lead-times"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": null,
+          "header": [
+            {
+              "key": "Date",
+              "value": "Fri, 20 Mar 2026 06:50:43 GMT"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Content-Length",
+              "value": "215"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Apigw-Requestid",
+              "value": "agoqqh0EYosEJVg="
+            }
+          ],
+          "cookie": [],
+          "body": "[\n    {\n        \"horizon\": 5,\n        \"min\": 3,\n        \"q1\": 8,\n        \"median\": 12,\n        \"q3\": 16,\n        \"max\": 22\n    },\n    {\n        \"horizon\": 10,\n        \"min\": 8,\n        \"q1\": 16,\n        \"median\": 22,\n        \"q3\": 28,\n        \"max\": 38\n    },\n    {\n        \"horizon\": 15,\n        \"min\": 12,\n        \"q1\": 24,\n        \"median\": 36,\n        \"q3\": 44,\n        \"max\": 58\n    }\n]"
+        }
+      ]
+    },
+    {
+      "name": "Acknowledge Alert",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/alerts/ALT-001/acknowledge",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "alerts",
+            "ALT-001",
+            "acknowledge"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/alerts/ALT-001/acknowledge",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "alerts",
+                "ALT-001",
+                "acknowledge"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": null,
+          "header": [
+            {
+              "key": "Date",
+              "value": "Fri, 20 Mar 2026 06:55:38 GMT"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Content-Length",
+              "value": "22"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Apigw-Requestid",
+              "value": "agpYph2C4osEMzg="
+            }
+          ],
+          "cookie": [],
+          "body": "{\n    \"acknowledged\": true\n}"
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": ""
+    }
+  ]
+}

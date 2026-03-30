@@ -1,0 +1,11 @@
+{
+    "FunctionName": "services_lambda",
+    "Runtime": "python3.12",
+    "Handler": "lambda_function.lambda_handler",
+    "Timeout": 3,
+    "MemorySize": 128,
+    "Environment": {
+        "KPI_TABLE": "KPIMetrics"
+    },
+    "PackageType": "Zip"
+}

@@ -1,0 +1,14 @@
+[
+    {
+        "FunctionArn": "arn:aws:lambda:ca-central-1:052808603722:function:inference_lambda",
+        "EventSourceArn": "arn:aws:dynamodb:ca-central-1:052808603722:table/FeatureStore/stream/2026-03-28T03:30:25.953",
+        "State": "Enabled",
+        "BatchSize": 1
+    },
+    {
+        "FunctionArn": "arn:aws:lambda:ca-central-1:052808603722:function:feature_engineering_lambda",
+        "EventSourceArn": "arn:aws:dynamodb:ca-central-1:052808603722:table/KPIMetrics/stream/2026-03-28T03:30:10.164",
+        "State": "Enabled",
+        "BatchSize": 1
+    }
+]

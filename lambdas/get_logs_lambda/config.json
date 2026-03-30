@@ -1,0 +1,11 @@
+{
+    "FunctionName": "get_logs_lambda",
+    "Runtime": "python3.12",
+    "Handler": "lambda_function.lambda_handler",
+    "Timeout": 3,
+    "MemorySize": 128,
+    "Environment": {
+        "LOG_TABLE": "ServiceLogs"
+    },
+    "PackageType": "Zip"
+}

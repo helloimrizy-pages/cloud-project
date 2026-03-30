@@ -1,0 +1,11 @@
+{
+    "FunctionName": "alerts_lambda",
+    "Runtime": "python3.12",
+    "Handler": "lambda_function.lambda_handler",
+    "Timeout": 3,
+    "MemorySize": 128,
+    "Environment": {
+        "ALERTS_TABLE": "Alerts"
+    },
+    "PackageType": "Zip"
+}

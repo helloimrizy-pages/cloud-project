@@ -1,0 +1,16 @@
+{
+    "FunctionName": "control_simulation_lambda",
+    "Runtime": "python3.12",
+    "Handler": "lambda_function.lambda_handler",
+    "Timeout": 30,
+    "MemorySize": 128,
+    "Environment": {
+        "LOG_TABLE": "ServiceLogs",
+        "FEATURE_TABLE": "FeatureStore",
+        "SIMCONFIG_TABLE": "SimConfig",
+        "INCIDENTS_TABLE": "Incidents",
+        "ALERTS_TABLE": "Alerts",
+        "KPI_TABLE": "KPIMetrics"
+    },
+    "PackageType": "Zip"
+}

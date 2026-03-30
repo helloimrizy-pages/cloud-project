@@ -9,35 +9,39 @@ Real-time AIOps platform for predictive incident detection in cloud services. Us
 ```
 React Dashboard (S3)
         |
-   API Gateway
+   API Gateway (19 routes, JWT auth)
         |
-  Lambda Functions
+  Lambda Functions (13)
         |
-   +-----------+-----------+
-   |           |           |
-Simulator   Feature     Inference
-(EventBridge  Engineering  (loads models
- 1/min)      (DynamoDB     from S3)
-              Streams)
+   +-----------+-----------+-----------+
+   |           |           |           |
+Simulator   Feature     Inference   Notifications
+(EventBridge  Engineering  (loads      (SNS email
+ 1/min)      (DynamoDB     models      alerts)
+              Streams)     from S3)
    |           |           |
    +-----+-----+-----+----+
          |           |
-      DynamoDB      S3
-      (6 tables)   (models,
-                    configs)
+      DynamoDB      S3          SNS
+      (6 tables)   (models,   (email
+                   frontend)   alerts)
 ```
 
 **Services monitored:** Web API, DB Pool, Message Queue, Auth Service, ML Pipeline
+
+**Scenarios:** Web API Degradation, DB Cascade Failure, Message Queue Backlog, Auth Service Failure, ML Pipeline Drift, Normal Operations
 
 ## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
 | Frontend | React 19, TypeScript, Vite, Tailwind CSS 4, Recharts |
-| API | AWS API Gateway (HTTP API) |
-| Compute | AWS Lambda (Python 3.11, Docker) |
-| Database | DynamoDB (6 tables with Streams) |
-| Storage | S3 (models, frontend, configs) |
+| API | AWS API Gateway (HTTP API), JWT Authorizer |
+| Compute | AWS Lambda (Python 3.11/3.12, Docker) |
+| Database | DynamoDB (6 tables with Streams, per-user isolation) |
+| Storage | S3 (models, frontend) |
+| Notifications | Amazon SNS (per-user email alerts) |
+| Auth | AWS Cognito (SRP protocol) |
 | Scheduler | EventBridge (1-min interval) |
 | ML | scikit-learn Gradient Boosting Classifier |
 
@@ -45,17 +49,34 @@ Simulator   Feature     Inference
 
 ```
 .
-├── dashboard/                  # Frontend application
+├── dashboard/                  # React 19 frontend application
 │   ├── src/
 │   │   ├── components/         # Layout, Sidebar, ServiceHealthCard
 │   │   ├── pages/              # LiveControls, KPITimeline, Alerts, Analytics
-│   │   ├── hooks/              # useApi, useTheme
-│   │   ├── lib/                # API client, chart colors
+│   │   ├── hooks/              # useApi (with auto-polling), useAuth, useTheme
+│   │   ├── lib/                # API client, auth helpers, chart colors
 │   │   └── data/               # TypeScript type definitions
 │   └── vite.config.ts
-├── inference-final/            # Lambda inference function
-│   ├── lambda_function.py      # Prediction handler
+├── lambdas/                    # All 13 AWS Lambda functions
+│   ├── simulator_lambda/       # Generates KPI metrics for 5 services
+│   ├── feature_engineering_lambda/  # Computes 8 rolling features
+│   ├── inference_lambda/       # ML prediction + SNS alerts (Docker)
+│   ├── control_simulation_lambda/   # Start/stop/state endpoints
+│   ├── services_lambda/        # GET /services
+│   ├── kpi_lambda/             # GET /kpi/{serviceId}
+│   ├── alerts_lambda/          # GET /alerts/active, /alerts/history
+│   ├── incidents_lambda/       # GET /incidents
+│   ├── analytics_lambda/       # GET /analytics/*
+│   ├── threshold_lambda/       # GET /thresholds
+│   ├── get_metrics_lambda/     # GET /metrics
+│   ├── get_logs_lambda/        # GET /logs
+│   ├── notifications_lambda/   # Email subscribe/unsubscribe via SNS
+│   └── infrastructure/         # DynamoDB schemas, API Gateway routes,
+│                               # EventBridge rules, SNS topic, stream triggers
+├── ml/                         # Machine learning pipeline
+│   ├── lambda_function.py      # Inference handler (also in lambdas/)
 │   ├── Dockerfile              # Lambda container image
+│   ├── work.ipynb              # Analysis notebook
 │   ├── data/
 │   │   └── retrain_and_export.py  # Model training script
 │   └── output/                 # Trained models + thresholds
@@ -64,9 +85,18 @@ Simulator   Feature     Inference
 │       ├── model_h15.pkl
 │       ├── thresholds.json
 │       └── feature_importances.json
-├── work.ipynb                  # Analysis notebook
-├── project_spec.md             # Project specification
-└── Backend.postman_collection.json  # API documentation
+├── docs/                       # Documentation and reports
+│   ├── implementation-report.tex   # LaTeX implementation report
+│   ├── slides.tex                  # Presentation slides
+│   ├── images/                     # Screenshots for the report
+│   ├── figures/                    # ML performance charts
+│   ├── testing-documentation.md
+│   ├── manual-testing-documentation.md
+│   ├── security-audit.md
+│   ├── project_spec.md
+│   ├── video-script.md
+│   └── *.pdf                       # Proposal, design doc, API contract
+└── README.md
 ```
 
 ## ML Pipeline
@@ -101,6 +131,8 @@ Simulator   Feature     Inference
 
 Base URL: `https://p9fpx4nhh6.execute-api.ca-central-1.amazonaws.com`
 
+All routes are JWT-protected via AWS Cognito.
+
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/services` | List monitored services |
@@ -117,6 +149,24 @@ Base URL: `https://p9fpx4nhh6.execute-api.ca-central-1.amazonaws.com`
 | GET | `/analytics/methods` | Model comparison |
 | GET | `/analytics/features` | Feature importance |
 | GET | `/analytics/lead-times` | Lead time distribution |
+| GET | `/metrics` | Raw metric records |
+| GET | `/logs` | Service log records |
+| GET | `/notifications/status` | Email subscription status |
+| POST | `/notifications/subscribe` | Subscribe to email alerts |
+| POST | `/notifications/unsubscribe` | Unsubscribe from email alerts |
+
+## DynamoDB Tables
+
+All tables use per-user data isolation via `owner_id` partitioning.
+
+| Table | Partition Key | Sort Key | Purpose |
+|-------|--------------|----------|---------|
+| KPIMetrics | owner_service | timestamp | Raw service metrics |
+| ServiceLogs | owner_service | timestamp | Event logs |
+| FeatureStore | owner_service | timestamp | Computed features |
+| Alerts | owner_id | created_at | Prediction alerts |
+| Incidents | owner_id | created_at | Grouped alerts |
+| SimConfig | owner_id | config_key | Simulation state |
 
 ## Getting Started
 
@@ -130,42 +180,38 @@ npm run dev
 
 The dev server proxies `/api` requests to the API Gateway. Open `http://localhost:5173`.
 
+### Deploy Frontend
+
+```bash
+cd dashboard
+npm run build
+aws s3 sync dist/ s3://cloud-project-dashboard1/ --delete --exclude "models/*"
+```
+
 ### Retrain Models
 
 ```bash
-cd inference-final/data
+cd ml/data
 python retrain_and_export.py
+aws s3 cp ../output/ s3://cloud-project-dashboard1/models/ --recursive
 ```
 
-Outputs `.pkl` models and `thresholds.json` to `inference-final/output/`.
-
-### Deploy Lambda
+### Deploy Inference Lambda
 
 ```bash
-cd inference-final
-docker build -t cloudwatch-inference .
-# Push to ECR, update Lambda function
+cd ml
+docker build --platform linux/amd64 -t inference-lambda .
+# Tag and push to ECR, then update Lambda function code
 ```
 
 ## Dashboard Pages
 
-- **Live Controls** -- Start/stop simulation scenarios, monitor service health in real time
+- **Live Controls** -- Start/stop 6 simulation scenarios, monitor service health in real time
 - **KPI Timeline** -- Time-series charts with prediction score overlays and threshold lines
-- **Alerts** -- Active and historical alerts with severity badges, incident timelines
+- **Alerts** -- Active and historical alerts with severity badges, incident timelines, email notification toggle
 - **Analytics** -- Model precision vs detection rate, lead time distributions, feature importance
 
-Supports dark and light themes with persistent preference.
-
-## DynamoDB Tables
-
-| Table | Partition Key | Sort Key | Purpose |
-|-------|--------------|----------|---------|
-| KPIMetrics | service_id | timestamp | Raw service metrics |
-| ServiceLogs | service_id | timestamp | Event logs |
-| FeatureStore | service_id | timestamp | Computed features |
-| Alerts | alert_id | -- | Prediction alerts |
-| Incidents | incident_id | -- | Grouped alerts |
-| SimConfig | config_id | -- | Simulation state |
+Auto-polling (5s) with visibility-based pausing. Supports dark and light themes with persistent preference.
 
 ## Team
 
