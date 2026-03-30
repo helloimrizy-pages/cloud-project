@@ -5,10 +5,13 @@ import joblib
 import numpy as np
 
 s3 = boto3.client('s3')
+sns = boto3.client('sns')
 dynamodb = boto3.resource('dynamodb')
 alerts_table = dynamodb.Table(os.environ.get('ALERTS_TABLE', 'Alerts'))
 incidents_table = dynamodb.Table(os.environ.get('INCIDENTS_TABLE', 'Incidents'))
 kpi_table = dynamodb.Table(os.environ.get('KPI_TABLE', 'KPIMetrics'))
+
+SNS_TOPIC_ARN = os.environ.get('SNS_TOPIC_ARN', '')
 
 BUCKET = os.environ.get('MODEL_BUCKET', 'cloud-project-dashboard1')
 HORIZONS = [5, 10, 15]
@@ -57,10 +60,9 @@ def get_default_threshold(horizon):
 
 
 def determine_severity(score, threshold):
-    ratio = score / threshold if threshold > 0 else 1.0
-    if ratio >= 1.03:
+    if score >= 0.92:
         return 'CRITICAL'
-    elif ratio >= 1.0:
+    elif score >= threshold:
         return 'WARNING'
     else:
         return 'INFO'
@@ -103,6 +105,27 @@ def create_alert(owner_id, service_id, timestamp, score, threshold, horizon, tic
     }
     alerts_table.put_item(Item=alert_item)
     print(f'ALERT CREATED: {alert_id} | {service_id} | H={horizon} | score={score:.3f} > thresh={threshold:.3f}')
+
+    if SNS_TOPIC_ARN:
+        try:
+            sns.publish(
+                TopicArn=SNS_TOPIC_ARN,
+                Subject=f'[{severity}] CloudWatch AI Alert - {info["name"]}',
+                Message=(
+                    f'CloudWatch AI Alert\n'
+                    f'-------------------\n'
+                    f'Service: {info["name"]}\n'
+                    f'Severity: {severity}\n'
+                    f'Prediction Score: {score:.4f} (threshold: {threshold:.4f})\n'
+                    f'Horizon: {horizon} minutes\n'
+                    f'Description: Predicted incident: {info["metric"]} degradation within {horizon} minutes\n'
+                    f'Alert ID: {alert_id}\n'
+                    f'Time: {timestamp}\n'
+                ),
+            )
+        except Exception as e:
+            print(f'SNS publish failed: {e}')
+
     return alert_item
 
 
