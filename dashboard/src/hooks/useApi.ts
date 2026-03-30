@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 
-export const POLL_INTERVAL = 15_000;
+export const POLL_INTERVAL = 5_000;
 
 interface UseApiResult<T> {
   data: T | null;

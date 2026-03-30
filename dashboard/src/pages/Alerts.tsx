@@ -44,7 +44,7 @@ function AlertCard({ alert, onAcknowledge, onDismiss }: { alert: Alert; onAcknow
         </div>
       </div>
       <div className="flex items-center justify-between mt-3">
-        <span className="text-xs text-text-muted">Fired at {alert.firedAt}</span>
+        <span className="text-xs text-text-muted">Fired at {new Date(alert.firedAt).toLocaleString()}</span>
         {!alert.acknowledged && onAcknowledge && onDismiss && (
           <div className="flex gap-2">
             <button onClick={onAcknowledge} className="text-[11px] px-3 py-1 rounded-lg border border-accent/30 text-accent hover:bg-accent/10 transition-all duration-150 active:scale-[0.97]">

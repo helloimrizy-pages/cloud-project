@@ -106,7 +106,7 @@ def create_alert(owner_id, service_id, timestamp, score, threshold, horizon, tic
     alerts_table.put_item(Item=alert_item)
     print(f'ALERT CREATED: {alert_id} | {service_id} | H={horizon} | score={score:.3f} > thresh={threshold:.3f}')
 
-    if SNS_TOPIC_ARN:
+    if SNS_TOPIC_ARN and owner_id:
         try:
             sns.publish(
                 TopicArn=SNS_TOPIC_ARN,
@@ -122,6 +122,12 @@ def create_alert(owner_id, service_id, timestamp, score, threshold, horizon, tic
                     f'Alert ID: {alert_id}\n'
                     f'Time: {timestamp}\n'
                 ),
+                MessageAttributes={
+                    'owner_id': {
+                        'DataType': 'String',
+                        'StringValue': owner_id,
+                    },
+                },
             )
         except Exception as e:
             print(f'SNS publish failed: {e}')
