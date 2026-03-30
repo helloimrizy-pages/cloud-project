@@ -6,6 +6,9 @@ import { api } from '../lib/api';
 const scenarios = [
   { label: 'Web API Degradation', value: 'web_api_degradation' },
   { label: 'DB Cascade Failure', value: 'db_cascade_failure' },
+  { label: 'Message Queue Backlog', value: 'mq_backlog' },
+  { label: 'Auth Service Failure', value: 'auth_service_failure' },
+  { label: 'ML Pipeline Drift', value: 'ml_pipeline_drift' },
   { label: 'Normal Operations', value: 'baseline' },
 ];
 
