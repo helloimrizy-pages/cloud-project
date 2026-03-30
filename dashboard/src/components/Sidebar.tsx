@@ -12,8 +12,8 @@ const navItems = [
 ];
 
 export default function Sidebar() {
-  const { data: alerts } = useApi(() => api.getActiveAlerts());
-  const { data: simState } = useApi(() => api.getSimulationState());
+  const { data: alerts } = useApi(() => api.getActiveAlerts(), [], 15000);
+  const { data: simState } = useApi(() => api.getSimulationState(), [], 15000);
   const { user, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
 

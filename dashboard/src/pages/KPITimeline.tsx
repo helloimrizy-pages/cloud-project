@@ -36,21 +36,28 @@ export default function KPITimeline() {
 
   useEffect(() => {
     if (!services) return;
-    let cancelled = false;
-    setKpiLoading(true);
-    setKpiError(null);
 
-    const promise = isAllView
-      ? Promise.all(services.map(svc => api.getKPI(svc.id).then(d => [svc.id, d] as const)))
-          .then(entries => { if (!cancelled) setKpiData(Object.fromEntries(entries)); })
-      : api.getKPI(selectedService)
-          .then(d => { if (!cancelled) setKpiData(prev => ({ ...prev, [selectedService]: d })); });
+    const fetchKpi = () => {
+      let cancelled = false;
+      setKpiLoading(prev => kpiData[selectedService] ? false : prev);
+      setKpiError(null);
 
-    promise
-      .catch((err: Error) => { if (!cancelled) setKpiError(err.message); })
-      .finally(() => { if (!cancelled) setKpiLoading(false); });
+      const promise = isAllView
+        ? Promise.all(services.map(svc => api.getKPI(svc.id).then(d => [svc.id, d] as const)))
+            .then(entries => { if (!cancelled) setKpiData(Object.fromEntries(entries)); })
+        : api.getKPI(selectedService)
+            .then(d => { if (!cancelled) setKpiData(prev => ({ ...prev, [selectedService]: d })); });
 
-    return () => { cancelled = true; };
+      promise
+        .catch((err: Error) => { if (!cancelled) setKpiError(err.message); })
+        .finally(() => { if (!cancelled) setKpiLoading(false); });
+
+      return () => { cancelled = true; };
+    };
+
+    const cancel = fetchKpi();
+    const id = setInterval(fetchKpi, 15000);
+    return () => { cancel(); clearInterval(id); };
   }, [selectedService, services]);
 
   const allData = useMemo(() => {

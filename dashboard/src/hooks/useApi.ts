@@ -10,6 +10,7 @@ interface UseApiResult<T> {
 export function useApi<T>(
   fetcher: () => Promise<T>,
   deps: unknown[] = [],
+  pollInterval?: number,
 ): UseApiResult<T> {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(true);
@@ -21,7 +22,7 @@ export function useApi<T>(
     let cancelled = false;
     cancelRef.current = () => { cancelled = true; };
 
-    setLoading(true);
+    if (data === null) setLoading(true);
     setError(null);
 
     fetcher()
@@ -35,6 +36,12 @@ export function useApi<T>(
     execute();
     return () => { cancelRef.current?.(); };
   }, [execute]);
+
+  useEffect(() => {
+    if (!pollInterval) return;
+    const id = setInterval(execute, pollInterval);
+    return () => clearInterval(id);
+  }, [execute, pollInterval]);
 
   return { data, loading, error, refetch: execute };
 }

@@ -13,8 +13,8 @@ const scenarios = [
 ];
 
 export default function LiveControls() {
-  const { data: services, loading: svcLoading } = useApi(() => api.getServices());
-  const { data: simState, loading: simLoading, refetch: refetchSim } = useApi(() => api.getSimulationState());
+  const { data: services, loading: svcLoading } = useApi(() => api.getServices(), [], 15000);
+  const { data: simState, loading: simLoading, refetch: refetchSim } = useApi(() => api.getSimulationState(), [], 15000);
   const [selectedScenario, setSelectedScenario] = useState('web_api_degradation');
 
   if (svcLoading || simLoading) {

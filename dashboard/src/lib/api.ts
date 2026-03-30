@@ -44,4 +44,7 @@ export const api = {
   }),
   stopSimulation:     ()                               => apiFetch<{ message: string }>('/simulation/stop', { method: 'POST' }),
   acknowledgeAlert:   (id: string)                     => apiFetch<{ acknowledged: boolean }>(`/alerts/${id}/acknowledge`, { method: 'POST' }),
+  getNotificationStatus: ()                            => apiFetch<{ email: string; subscribed: boolean; pending: boolean }>('/notifications/status'),
+  subscribe:          ()                               => apiFetch<{ message: string; email: string }>('/notifications/subscribe', { method: 'POST' }),
+  unsubscribe:        ()                               => apiFetch<{ message: string; email: string }>('/notifications/unsubscribe', { method: 'POST' }),
 };

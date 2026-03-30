@@ -64,13 +64,15 @@ function AlertCard({ alert, onAcknowledge, onDismiss }: { alert: Alert; onAcknow
 }
 
 export default function Alerts() {
-  const { data: fetchedAlerts, loading: alertsLoading } = useApi(() => api.getActiveAlerts());
-  const { data: pastAlerts, loading: historyLoading } = useApi(() => api.getAlertHistory());
-  const { data: incidents, loading: incidentsLoading } = useApi(() => api.getIncidents());
+  const { data: fetchedAlerts, loading: alertsLoading } = useApi(() => api.getActiveAlerts(), [], 15000);
+  const { data: pastAlerts, loading: historyLoading } = useApi(() => api.getAlertHistory(), [], 15000);
+  const { data: incidents, loading: incidentsLoading } = useApi(() => api.getIncidents(), [], 15000);
+  const { data: notifStatus, refetch: refetchNotif } = useApi(() => api.getNotificationStatus());
 
   const [acknowledged, setAcknowledged] = useState<Set<string>>(new Set());
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
   const [showHistory, setShowHistory] = useState(false);
+  const [notifLoading, setNotifLoading] = useState(false);
 
   if (alertsLoading || historyLoading || incidentsLoading) {
     return (
@@ -102,11 +104,51 @@ export default function Alerts() {
 
   const incident = incidents?.[0];
 
+  const handleNotifToggle = async () => {
+    setNotifLoading(true);
+    try {
+      if (notifStatus?.subscribed) {
+        await api.unsubscribe();
+      } else {
+        await api.subscribe();
+      }
+      refetchNotif();
+    } catch (err) {
+      console.error('Notification toggle failed:', err);
+    } finally {
+      setNotifLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-8">
-      <div>
-        <h2 className="text-xl font-semibold tracking-tight">Alerts & Incidents</h2>
-        <p className="text-sm text-text-muted mt-1">Monitor predictive alerts and incident timelines</p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h2 className="text-xl font-semibold tracking-tight">Alerts & Incidents</h2>
+          <p className="text-sm text-text-muted mt-1">Monitor predictive alerts and incident timelines</p>
+        </div>
+        {notifStatus && (
+          <div className="flex items-center gap-3 bg-bg-card border border-border rounded-xl px-4 py-2.5">
+            <div className="text-right">
+              <p className="text-xs font-medium text-text-secondary">Email Notifications</p>
+              <p className="text-[11px] text-text-muted">{notifStatus.email}</p>
+              {notifStatus.pending && (
+                <p className="text-[11px] text-warning">Check email to confirm</p>
+              )}
+            </div>
+            <button
+              onClick={handleNotifToggle}
+              disabled={notifLoading}
+              className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${
+                notifStatus.subscribed ? 'bg-accent' : 'bg-border'
+              } ${notifLoading ? 'opacity-50' : ''}`}
+            >
+              <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform duration-200 ${
+                notifStatus.subscribed ? 'translate-x-5' : 'translate-x-0'
+              }`} />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Active Alerts */}
