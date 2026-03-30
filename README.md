@@ -6,26 +6,7 @@ Real-time AIOps platform for predictive incident detection in cloud services. Us
 
 ## Architecture
 
-```
-React Dashboard (S3)
-        |
-   API Gateway (19 routes, JWT auth)
-        |
-  Lambda Functions (13)
-        |
-   +-----------+-----------+-----------+
-   |           |           |           |
-Simulator   Feature     Inference   Notifications
-(EventBridge  Engineering  (loads      (SNS email
- 1/min)      (DynamoDB     models      alerts)
-              Streams)     from S3)
-   |           |           |
-   +-----+-----+-----+----+
-         |           |
-      DynamoDB      S3          SNS
-      (6 tables)   (models,   (email
-                   frontend)   alerts)
-```
+![Architecture Diagram](docs/images/architecture_diagram.png)
 
 **Services monitored:** Web API, DB Pool, Message Queue, Auth Service, ML Pipeline
 
