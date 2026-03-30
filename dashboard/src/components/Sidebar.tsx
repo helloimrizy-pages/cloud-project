@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { useApi } from '../hooks/useApi';
+import { useApi, POLL_INTERVAL } from '../hooks/useApi';
 import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../hooks/useTheme';
 import { api } from '../lib/api';
@@ -12,8 +12,8 @@ const navItems = [
 ];
 
 export default function Sidebar() {
-  const { data: alerts } = useApi(() => api.getActiveAlerts(), [], 15000);
-  const { data: simState } = useApi(() => api.getSimulationState(), [], 15000);
+  const { data: alerts } = useApi(() => api.getActiveAlerts(), [], POLL_INTERVAL);
+  const { data: simState } = useApi(() => api.getSimulationState(), [], POLL_INTERVAL);
   const { user, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
 

@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import type { Alert } from '../data/types';
-import { useApi } from '../hooks/useApi';
+import { useApi, POLL_INTERVAL } from '../hooks/useApi';
 import { api } from '../lib/api';
 
-const severityColors: Record<string, { border: string; bg: string; text: string }> = {
+const severityColors: Record<Alert['severity'], { border: string; bg: string; text: string }> = {
   CRITICAL: { border: 'border-danger/40', bg: 'bg-danger/15', text: 'text-danger' },
   WARNING: { border: 'border-warning/40', bg: 'bg-warning/15', text: 'text-warning' },
   INFO: { border: 'border-info/40', bg: 'bg-info/15', text: 'text-info' },
@@ -64,9 +64,9 @@ function AlertCard({ alert, onAcknowledge, onDismiss }: { alert: Alert; onAcknow
 }
 
 export default function Alerts() {
-  const { data: fetchedAlerts, loading: alertsLoading } = useApi(() => api.getActiveAlerts(), [], 15000);
-  const { data: pastAlerts, loading: historyLoading } = useApi(() => api.getAlertHistory(), [], 15000);
-  const { data: incidents, loading: incidentsLoading } = useApi(() => api.getIncidents(), [], 15000);
+  const { data: fetchedAlerts, loading: alertsLoading } = useApi(() => api.getActiveAlerts(), [], POLL_INTERVAL);
+  const { data: pastAlerts, loading: historyLoading } = useApi(() => api.getAlertHistory(), [], POLL_INTERVAL);
+  const { data: incidents, loading: incidentsLoading } = useApi(() => api.getIncidents(), [], POLL_INTERVAL);
   const { data: notifStatus, refetch: refetchNotif } = useApi(() => api.getNotificationStatus());
 
   const [acknowledged, setAcknowledged] = useState<Set<string>>(new Set());

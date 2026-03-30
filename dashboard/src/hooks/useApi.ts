@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 
+export const POLL_INTERVAL = 15_000;
+
 interface UseApiResult<T> {
   data: T | null;
   loading: boolean;
@@ -16,19 +18,23 @@ export function useApi<T>(
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const cancelRef = useRef<(() => void) | null>(null);
+  const initialLoadDone = useRef(false);
+  const inFlight = useRef(false);
 
   const execute = useCallback(() => {
+    if (inFlight.current) return;
     cancelRef.current?.();
     let cancelled = false;
     cancelRef.current = () => { cancelled = true; };
 
-    if (data === null) setLoading(true);
+    if (!initialLoadDone.current) setLoading(true);
     setError(null);
+    inFlight.current = true;
 
     fetcher()
-      .then(d => { if (!cancelled) setData(d); })
+      .then(d => { if (!cancelled) { setData(d); initialLoadDone.current = true; } })
       .catch((err: Error) => { if (!cancelled) setError(err.message); })
-      .finally(() => { if (!cancelled) setLoading(false); });
+      .finally(() => { inFlight.current = false; if (!cancelled) setLoading(false); });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
 
@@ -39,7 +45,9 @@ export function useApi<T>(
 
   useEffect(() => {
     if (!pollInterval) return;
-    const id = setInterval(execute, pollInterval);
+    const id = setInterval(() => {
+      if (!document.hidden) execute();
+    }, pollInterval);
     return () => clearInterval(id);
   }, [execute, pollInterval]);
 

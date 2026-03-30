@@ -1,10 +1,10 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ReferenceLine, ReferenceArea, ResponsiveContainer, Legend,
 } from 'recharts';
 import type { KPIDataPoint } from '../data/types';
-import { useApi } from '../hooks/useApi';
+import { useApi, POLL_INTERVAL } from '../hooks/useApi';
 import { useTheme } from '../hooks/useTheme';
 import { api } from '../lib/api';
 import { chartColors } from '../lib/chartColors';
@@ -12,11 +12,9 @@ import { chartColors } from '../lib/chartColors';
 const serviceColors: Record<string, string> = {
   'web-api-001': '#e74c3c',
   'db-pool-001': '#f39c12',
-  'msg-queue-001': '#2ecc71',
-  'auth-svc-001': '#3498db',
-  'ml-pipeline-001': '#9b59b6',
   'mq-001': '#2ecc71',
   'auth-001': '#3498db',
+  'ml-pipeline-001': '#9b59b6',
 };
 
 export default function KPITimeline() {
@@ -28,37 +26,20 @@ export default function KPITimeline() {
 
   const [selectedService, setSelectedService] = useState('web-api-001');
   const [horizon, setHorizon] = useState(15);
-  const [kpiData, setKpiData] = useState<Record<string, KPIDataPoint[]>>({});
-  const [kpiLoading, setKpiLoading] = useState(false);
-  const [kpiError, setKpiError] = useState<string | null>(null);
 
   const isAllView = selectedService === 'all';
 
-  useEffect(() => {
-    if (!services) return;
+  const kpiFetcher = useCallback(() => {
+    if (!services) return Promise.resolve({} as Record<string, KPIDataPoint[]>);
+    if (isAllView) {
+      return Promise.all(services.map(svc => api.getKPI(svc.id).then(d => [svc.id, d] as const)))
+        .then(entries => Object.fromEntries(entries));
+    }
+    return api.getKPI(selectedService).then(d => ({ [selectedService]: d }));
+  }, [selectedService, services, isAllView]);
 
-    const fetchKpi = () => {
-      let cancelled = false;
-      setKpiLoading(prev => kpiData[selectedService] ? false : prev);
-      setKpiError(null);
-
-      const promise = isAllView
-        ? Promise.all(services.map(svc => api.getKPI(svc.id).then(d => [svc.id, d] as const)))
-            .then(entries => { if (!cancelled) setKpiData(Object.fromEntries(entries)); })
-        : api.getKPI(selectedService)
-            .then(d => { if (!cancelled) setKpiData(prev => ({ ...prev, [selectedService]: d })); });
-
-      promise
-        .catch((err: Error) => { if (!cancelled) setKpiError(err.message); })
-        .finally(() => { if (!cancelled) setKpiLoading(false); });
-
-      return () => { cancelled = true; };
-    };
-
-    const cancel = fetchKpi();
-    const id = setInterval(fetchKpi, 15000);
-    return () => { cancel(); clearInterval(id); };
-  }, [selectedService, services]);
+  const { data: kpiResult, loading: kpiLoading, error: kpiError } = useApi(kpiFetcher, [selectedService, services], POLL_INTERVAL);
+  const kpiData = kpiResult ?? {};
 
   const allData = useMemo(() => {
     if (!isAllView || kpiLoading || !services) return [];

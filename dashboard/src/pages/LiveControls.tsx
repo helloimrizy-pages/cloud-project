@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import ServiceHealthCard from '../components/ServiceHealthCard';
-import { useApi } from '../hooks/useApi';
+import { useApi, POLL_INTERVAL } from '../hooks/useApi';
 import { api } from '../lib/api';
 
 const scenarios = [
@@ -13,9 +13,10 @@ const scenarios = [
 ];
 
 export default function LiveControls() {
-  const { data: services, loading: svcLoading } = useApi(() => api.getServices(), [], 15000);
-  const { data: simState, loading: simLoading, refetch: refetchSim } = useApi(() => api.getSimulationState(), [], 15000);
+  const { data: services, loading: svcLoading } = useApi(() => api.getServices(), [], POLL_INTERVAL);
+  const { data: simState, loading: simLoading, refetch: refetchSim } = useApi(() => api.getSimulationState(), [], POLL_INTERVAL);
   const [selectedScenario, setSelectedScenario] = useState('web_api_degradation');
+  const [actionLoading, setActionLoading] = useState<'start' | 'stop' | null>(null);
 
   if (svcLoading || simLoading) {
     return (
@@ -38,21 +39,15 @@ export default function LiveControls() {
     { label: 'Predictions', value: String(simState.predictionsProcessed) },
   ] : [];
 
-  const handleStart = async () => {
+  const handleAction = async (tag: 'start' | 'stop', action: () => Promise<unknown>) => {
+    setActionLoading(tag);
     try {
-      await api.startSimulation({ scenario: selectedScenario });
+      await action();
       refetchSim();
     } catch (err) {
-      console.error('Failed to start simulation:', err);
-    }
-  };
-
-  const handleStop = async () => {
-    try {
-      await api.stopSimulation();
-      refetchSim();
-    } catch (err) {
-      console.error('Failed to stop simulation:', err);
+      console.error(`Failed to ${tag} simulation:`, err);
+    } finally {
+      setActionLoading(null);
     }
   };
 
@@ -63,7 +58,6 @@ export default function LiveControls() {
         <p className="text-sm text-text-muted mt-1">Manage simulation scenarios and monitor service health</p>
       </div>
 
-      {/* Controls Row */}
       <div className="flex items-end gap-3">
         <div>
           <label className="text-[11px] text-text-muted uppercase tracking-wider block mb-1.5">Scenario</label>
@@ -79,25 +73,25 @@ export default function LiveControls() {
         </div>
         <button
           className={`px-5 py-2 rounded-lg text-sm font-medium transition-all duration-150 ${
-            isRunning
+            isRunning || actionLoading
               ? 'bg-bg-active text-text-muted border border-border cursor-not-allowed opacity-50'
               : 'bg-accent/15 text-accent border border-accent/20 hover:bg-accent/25 active:scale-[0.98]'
           }`}
-          disabled={isRunning}
-          onClick={handleStart}
+          disabled={isRunning || actionLoading !== null}
+          onClick={() => handleAction('start', () => api.startSimulation({ scenario: selectedScenario }))}
         >
-          Start
+          {actionLoading === 'start' ? 'Starting...' : 'Start'}
         </button>
         <button
           className={`px-5 py-2 rounded-lg text-sm font-medium transition-all duration-150 ${
-            isRunning
+            isRunning && !actionLoading
               ? 'bg-danger/15 text-danger border border-danger/20 hover:bg-danger/25 active:scale-[0.98]'
               : 'bg-bg-active text-text-muted border border-border cursor-not-allowed opacity-50'
           }`}
-          disabled={!isRunning}
-          onClick={handleStop}
+          disabled={!isRunning || actionLoading !== null}
+          onClick={() => handleAction('stop', () => api.stopSimulation())}
         >
-          Stop
+          {actionLoading === 'stop' ? 'Stopping...' : 'Stop'}
         </button>
         <div className="flex items-center gap-2 ml-3 px-3 py-2 rounded-lg bg-bg-card border border-border">
           <span className={`w-1.5 h-1.5 rounded-full ${isRunning ? 'bg-healthy animate-pulse' : 'bg-text-muted'}`} />
@@ -107,7 +101,6 @@ export default function LiveControls() {
         </div>
       </div>
 
-      {/* Summary Cards */}
       <div className="grid grid-cols-4 gap-4">
         {summaryCards.map(card => (
           <div key={card.label} className="bg-bg-card border border-border rounded-xl p-4">
@@ -117,7 +110,6 @@ export default function LiveControls() {
         ))}
       </div>
 
-      {/* Service Health Grid */}
       <div>
         <h3 className="text-sm font-medium text-text-secondary mb-3">Service Health</h3>
         <div className="grid grid-cols-5 gap-4">
