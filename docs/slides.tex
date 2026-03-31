@@ -546,114 +546,6 @@ Moving Avg. & 0.42 & 0.02 \\
 \end{columns}
 \end{frame}
 
-% % ===== SLIDE 10: IMPLEMENTATION -- DASHBOARD =====
-% \begin{frame}{Implementation: Dashboard}
-% \framesubtitle{React 19 Single-Page Application with 4 Interactive Pages}
-
-% \begin{columns}[T]
-% \begin{column}{0.48\textwidth}
-
-% \begin{block}{Page 1: Live Controls}
-% {\small
-% \begin{itemize}
-%     \item Start/Stop simulation scenarios
-%     \item Scenario selector dropdown
-%     \item 5 Service Health Cards with live status
-%     \item Summary cards: phase, tick, predictions
-% \end{itemize}
-% }
-% \end{block}
-
-% \vspace{0.2em}
-% \begin{block}{Page 2: KPI Timeline}
-% {\small
-% \begin{itemize}
-%     \item Real-time scrolling line charts (Recharts)
-%     \item Service tabs + ``All Services'' overlay
-%     \item Prediction score chart with threshold line
-%     \item Horizon toggle: 5m / 10m / 15m
-% \end{itemize}
-% }
-% \end{block}
-% \end{column}
-
-% \begin{column}{0.48\textwidth}
-% \begin{block}{Page 3: Alerts \& Incidents}
-% {\small
-% \begin{itemize}
-%     \item Active alerts with severity badges (Critical/Warning/Info)
-%     \item Acknowledge and dismiss actions
-%     \item Incident groups with colored phase timeline
-%     \item Collapsible alert history section
-% \end{itemize}
-% }
-% \end{block}
-
-% \vspace{0.2em}
-% \begin{block}{Page 4: Analytics}
-% {\small
-% \begin{itemize}
-%     \item Summary stats: precision, lead time, FAR
-%     \item Precision vs Detection Rate scatter chart
-%     \item Lead Time Distribution bar chart
-%     \item Feature Importance chart (KPI vs Log)
-% \end{itemize}
-% }
-% \end{block}
-% \end{column}
-% \end{columns}
-
-% \vspace{0.3em}
-% \centering
-% {\small \textit{[Screenshot placeholders: insert dashboard screenshots on next slide]}}
-% \end{frame}
-
-% % ===== SLIDE 11: IMPLEMENTATION -- DASHBOARD SCREENSHOTS =====
-% \begin{frame}{Dashboard Screenshots}
-% \framesubtitle{Live Controls \& KPI Timeline}
-
-% \begin{columns}
-% \begin{column}{0.48\textwidth}
-% \centering
-% \begin{tikzpicture}
-% \draw[UNBBlue, thick, rounded corners=4pt] (0,0) rectangle (5.2,3.5);
-% \node[font=\small, UNBGray] at (2.6,1.75) {\textit{[Screenshot: Live Controls page]}};
-% \node[font=\tiny, UNBGray] at (2.6,1.2) {Service Health Cards + Simulation};
-% \node[font=\tiny, UNBGray] at (2.6,0.8) {Controls with scenario selection};
-% \end{tikzpicture}
-% \end{column}
-% \begin{column}{0.48\textwidth}
-% \centering
-% \begin{tikzpicture}
-% \draw[UNBBlue, thick, rounded corners=4pt] (0,0) rectangle (5.2,3.5);
-% \node[font=\small, UNBGray] at (2.6,1.75) {\textit{[Screenshot: KPI Timeline page]}};
-% \node[font=\tiny, UNBGray] at (2.6,1.2) {Real-time KPI charts with prediction};
-% \node[font=\tiny, UNBGray] at (2.6,0.8) {score overlay and threshold lines};
-% \end{tikzpicture}
-% \end{column}
-% \end{columns}
-
-% \vspace{0.5em}
-% \begin{columns}
-% \begin{column}{0.48\textwidth}
-% \centering
-% \begin{tikzpicture}
-% \draw[UNBBlue, thick, rounded corners=4pt] (0,0) rectangle (5.2,3.0);
-% \node[font=\small, UNBGray] at (2.6,1.5) {\textit{[Screenshot: Alerts page]}};
-% \node[font=\tiny, UNBGray] at (2.6,1.0) {Alert cards + incident timeline};
-% \end{tikzpicture}
-% \end{column}
-% \begin{column}{0.48\textwidth}
-% \centering
-% \begin{tikzpicture}
-% \draw[UNBBlue, thick, rounded corners=4pt] (0,0) rectangle (5.2,3.0);
-% \node[font=\small, UNBGray] at (2.6,1.5) {\textit{[Screenshot: Analytics page]}};
-% \node[font=\tiny, UNBGray] at (2.6,1.0) {Model comparison charts};
-% \end{tikzpicture}
-% \end{column}
-% \end{columns}
-% \end{frame}
-
 % ===== SLIDE 12: IMPLEMENTATION -- BACKEND =====
 \begin{frame}[shrink=6]{Implementation: Backend}
 \framesubtitle{13 Lambda Functions with Event-Driven Processing}
@@ -787,16 +679,7 @@ HTTP 401 without valid JWT token.
 \end{column}
 \end{columns}
 \end{frame}
-% ===== SLIDE 16: Live Demo moved up =====
-\begin{frame}{Live Demo}
-\framesubtitle{Watch the Model Detect an Incident in Real Time}
 
-\centering
-\vspace{1cm}
-
-{\large \href{http://cloud-project-dashboard1.s3-website-us-east-1.amazonaws.com/}{Open Dashboard Demo}}
-
-\end{frame}
 
 % ===== SLIDE 14: OWASP + TESTING =====
 \begin{frame}[shrink=15]{Security Audit \& Testing}
@@ -864,6 +747,62 @@ Cross-Cutting (Theme, etc.) & 7 planned \\
 \end{columns}
 \end{frame}
 
+% ===== SLIDE 16: Live Demo moved up =====
+\begin{frame}{Live Demo}
+\framesubtitle{Watch the Model Detect an Incident in Real Time}
+
+\centering
+\vspace{1cm}
+
+{\large \href{http://cloud-project-dashboard1.s3-website-us-east-1.amazonaws.com/}{Open Dashboard Demo}}
+
+\end{frame}
+
+% ===== SLIDE 17: PERFORMANCE TESTING =====
+\begin{frame}[shrink=3]{Performance Testing}
+\framesubtitle{Lambda Execution Latency and Pipeline Throughput (ca-central-1)}
+
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+\vspace{-0.5em}
+\includegraphics[width=\linewidth]{lambda_warm_latency.png}
+
+\vspace{-0.6em}
+\begin{center}
+\scalebox{0.8}{%
+\parbox{8.5cm}{%
+\begin{block}{End-to-End Pipeline (Warm)}
+{\scriptsize
+\begin{center}
+\begin{tabular}{lr}
+\toprule
+\textbf{Stage} & \textbf{Duration} \\
+\midrule
+Simulator (5 services) & $\sim$56 ms \\
+Feature Eng.\ ($\times$5) & $\sim$32 ms each \\
+Inference ($\times$5) & $\sim$14 ms each \\
+SNS Notification & $\sim$50 ms \\
+\midrule
+\textbf{Total} & \textbf{$<$ 200 ms} \\
+\bottomrule
+\end{tabular}
+\end{center}
+}
+\end{block}
+}}
+\end{center}
+\end{column}
+
+\begin{column}{0.48\textwidth}
+\vspace{-0.5em}
+\includegraphics[width=\linewidth]{cold_start_breakdown.png}
+
+\vspace{0.3em}
+\includegraphics[width=\linewidth]{memory_utilization.png}
+\end{column}
+\end{columns}
+\end{frame}
+
 % ===== SLIDE 15: CHALLENGES AND SOLUTIONS =====
 \begin{frame}{Challenges and Solutions}
 \framesubtitle{Key Obstacles Encountered During Implementation}
@@ -889,139 +828,6 @@ Cross-Cutting (Theme, etc.) & 7 planned \\
 \end{column}
 \end{columns}
 \end{frame}
-
-
-
-% ===== SLIDE 16: LIVE DEMO FLOW =====
-% \begin{frame}{Live Demo}
-% \framesubtitle{Watch the Model Detect an Incident in Real Time}
-
-% \centering
-% \begin{tikzpicture}[
-%   node distance=0.6cm,
-%   step/.style={rectangle, rounded corners=4pt, draw=UNBBlue, fill=UNBLightGray, minimum width=11cm, minimum height=0.55cm, font=\small, align=left},
-%   highlight/.style={rectangle, rounded corners=4pt, draw=UNBGreen, fill=green!10, minimum width=11cm, minimum height=0.55cm, font=\small\bfseries, align=left},
-%   num/.style={circle, draw=UNBBlue, fill=UNBBlue, text=white, font=\tiny\bfseries, minimum size=0.4cm, inner sep=0pt}
-% ]
-
-% \node[step] (s1) {Open dashboard \& select ``Web API Degradation'' scenario};
-% \node[step, below=of s1] (s2) {Click Start Simulation --- EventBridge begins generating data};
-% \node[step, below=of s2] (s3) {Watch KPI Timeline --- all services show normal behavior (min 0--5)};
-% \node[step, below=of s3] (s4) {Web API response times start creeping up (min 5--7)};
-% \node[highlight, below=of s4] (s5) {Prediction score rises --- model fires alert \textbf{before} full incident (min 7--8)};
-% \node[step, below=of s5] (s6) {Full incident develops across Web API + DB Pool (min 9--12)};
-% \node[step, below=of s6] (s7) {Recovery phase --- metrics trend back to normal (min 12--15)};
-% \node[step, below=of s7] (s8) {Switch to Analytics page --- view precision, lead time, feature importance};
-
-% % Numbers
-% \node[num] at ([xshift=-5.9cm]s1.west) {1};
-% \node[num] at ([xshift=-5.9cm]s2.west) {2};
-% \node[num] at ([xshift=-5.9cm]s3.west) {3};
-% \node[num] at ([xshift=-5.9cm]s4.west) {4};
-% \node[num] at ([xshift=-5.9cm]s5.west) {5};
-% \node[num] at ([xshift=-5.9cm]s6.west) {6};
-% \node[num] at ([xshift=-5.9cm]s7.west) {7};
-% \node[num] at ([xshift=-5.9cm]s8.west) {8};
-
-% \end{tikzpicture}
-
-% \vspace{0.3em}
-% {\small Total demo time: $\sim$10--15 minutes. The model provides early warning 2+ minutes before the incident fully develops.}
-% \end{frame}
-
-% % ===== SLIDE 17: CONCLUSION =====
-% \begin{frame}{Conclusion}
-% \framesubtitle{Summary of Achievements}
-
-% \begin{columns}
-% \begin{column}{0.58\textwidth}
-% \begin{block}{What We Built}
-% \begin{enumerate}
-%     \item A \textbf{fully serverless} AIOps platform on AWS
-%     \item \textbf{ML-powered} incident prediction with 0.91 precision
-%     \item \textbf{Event-driven} pipeline: data $\rightarrow$ features $\rightarrow$ alerts (automatic)
-%     \item \textbf{Interactive dashboard} with real-time visualization
-%     \item \textbf{Comprehensive security}: Cognito auth, JWT, AES-256, OWASP audit
-% \end{enumerate}
-% \end{block}
-
-% \vspace{0.3em}
-% \begin{block}{Key Numbers}
-% {\small
-% \begin{tabular}{ll}
-% 12 Lambda Functions & 6 DynamoDB Tables \\
-% 16 API Routes (JWT) & 5 Monitored Services \\
-% 3 ML Models & 50+ Test Cases \\
-% 8 Engineered Features & 9/10 OWASP Passed \\
-% \end{tabular}
-% }
-% \end{block}
-% \end{column}
-
-% \begin{column}{0.38\textwidth}
-% \begin{alertblock}{Core Achievement}
-% {\small Predictive models don't just detect earlier --- they produce \textbf{more trustworthy alerts} with \textbf{fewer false alarms}, leading to higher operator trust.}
-% \end{alertblock}
-
-% \vspace{0.3em}
-% \begin{block}{Practical Impact}
-% {\small
-% Fewer false alarms\\
-% $\downarrow$\\
-% Higher on-call trust\\
-% $\downarrow$\\
-% Faster incident response\\
-% $\downarrow$\\
-% \textbf{Better cloud reliability}
-% }
-% \end{block}
-% \end{column}
-% \end{columns}
-% \end{frame}
-
-% % ===== SLIDE 18: FUTURE WORK =====
-% \begin{frame}{Future Work}
-% \framesubtitle{Potential Improvements and Extensions}
-
-% \begin{columns}[T]
-% \begin{column}{0.48\textwidth}
-% \begin{block}{Technical Extensions}
-% \begin{itemize}
-%     \item Replace synthetic log-proxies with \textbf{real system logs}
-%     \item Add \textbf{cross-service correlation} for cascading failure detection
-%     \item Test deeper models: \textbf{LSTM}, \textbf{Transformer}
-%     \item \textbf{Hyperparameter tuning} for improved recall
-%     \item Add \textbf{CloudFront CDN} for HTTPS frontend hosting
-% \end{itemize}
-% \end{block}
-% \end{column}
-
-% \begin{column}{0.48\textwidth}
-% \begin{block}{Operational Improvements}
-% \begin{itemize}
-%     \item \textbf{Online model updating} for concept drift
-%     \item Real production traffic integration
-%     \item \textbf{Multi-metric models} per service
-%     \item Automated \textbf{CI/CD pipeline} for model retraining
-%     \item Role-based access control (admin vs viewer)
-% \end{itemize}
-% \end{block}
-% \end{column}
-% \end{columns}
-
-% \vspace{0.5em}
-% \begin{block}{Known Limitations (Transparency)}
-% {\small
-% \begin{tabular}{ll}
-% \textbf{Limitation} & \textbf{Rationale} \\
-% \midrule
-% Low recall (8.7\%) & Precision prioritized for operator trust \\
-% Synthetic data & Controlled scenarios for consistent demos \\
-% One metric per service & Simplicity; multi-metric is a future extension \\
-% \end{tabular}
-% }
-% \end{block}
-% \end{frame}
 
 \begin{frame}[shrink=14]{Conclusion and Future Work}
 \framesubtitle{What We Built and What Comes Next}
