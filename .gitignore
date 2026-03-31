@@ -1,6 +1,5 @@
 .DS_Store
 .venv/
-.claude/
 
 # Large datasets
 KPI-Anomaly-Detection-master/

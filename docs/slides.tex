@@ -89,7 +89,7 @@
 \end{frame}
 
 % ===== SLIDE 2: PROJECT INTRODUCTION =====
-\begin{frame}{Project Introduction}
+\begin{frame}[shrink=2]{Project Introduction}
 \framesubtitle{Predicting Cloud Incidents Before They Happen}
 
 \begin{columns}
@@ -143,7 +143,7 @@ A real-time AIOps platform that uses \textbf{Gradient Boosting ML models} to pre
 \end{frame}
 
 % ===== SLIDE 3: KEY FEATURES =====
-\begin{frame}{Key Features}
+\begin{frame}[shrink=5]{Key Features}
 \framesubtitle{What Makes CloudWatch AI Unique}
 
 \begin{columns}[T]
@@ -161,7 +161,7 @@ A real-time AIOps platform that uses \textbf{Gradient Boosting ML models} to pre
 \begin{block}{Real-Time Simulation}
 \begin{itemize}
     \item 5 monitored cloud services
-    \item Realistic incident scenarios
+    \item 6 configurable failure scenarios
     \item Live data generation every 1 minute
     \item Event-driven pipeline via DynamoDB Streams
 \end{itemize}
@@ -175,6 +175,7 @@ A real-time AIOps platform that uses \textbf{Gradient Boosting ML models} to pre
     \item Dark/Light theme with persistent preference
     \item Real-time chart updates via polling
     \item Alert management with incident grouping
+    \item Opt in/out Incident Notification on Email
 \end{itemize}
 \end{block}
 
@@ -182,7 +183,7 @@ A real-time AIOps platform that uses \textbf{Gradient Boosting ML models} to pre
 \begin{block}{Enterprise Security}
 \begin{itemize}
     \item AWS Cognito authentication (SRP protocol)
-    \item JWT authorizer on all 16 API routes
+    \item JWT authorizer on all 19 API routes
     \item AES-256 encryption at rest
     \item TLS 1.2+ encryption in transit
 \end{itemize}
@@ -218,7 +219,7 @@ A real-time AIOps platform that uses \textbf{Gradient Boosting ML models} to pre
 \node[awsbox] (simulator) at (-4.5,1.5) {Simulator\\Lambda};
 \node[awsbox] (feateng) at (-1.2,1.5) {Feature Eng.\\Lambda};
 \node[awsbox] (inference) at (2.1,1.5) {Inference\\Lambda};
-\node[awsbox, minimum width=1.8cm] (apilambda) at (5.2,1.5) {API Lambdas\\(12 functions)};
+\node[awsbox, minimum width=1.8cm] (apilambda) at (5.2,1.5) {API Lambdas\\(13 functions)};
 
 % Row 4: Data stores
 \node[dbbox, minimum width=2.4cm] (kpi) at (-4.5,0) {KPIMetrics\\+ ServiceLogs};
@@ -244,6 +245,10 @@ A real-time AIOps platform that uses \textbf{Gradient Boosting ML models} to pre
 \draw[arrow] (inference.south east) -- (s3.north west);
 \node[label] at (4.0,0.9) {loads};
 
+% SNS
+\node[box, minimum width=1.8cm] (sns) at (2,-1.5) {Amazon SNS\\(Email Alerts)};
+\draw[arrow] (alerts) -- (sns);
+
 % API reads
 \draw[arrow, gray, thin] (apilambda) -- (alerts);
 \draw[arrow, gray, thin] (apilambda.south west) -- (kpi.north east);
@@ -253,18 +258,29 @@ A real-time AIOps platform that uses \textbf{Gradient Boosting ML models} to pre
 \vspace{0.3em}
 {\small
 \textbf{Key:} Solid arrows = direct calls. Dashed orange = DynamoDB Stream triggers (automatic, event-driven).\\
-12 Lambda functions total, all serverless. Entire platform runs within AWS Free Tier.
+13 Lambda functions total, all serverless. Entire platform runs within AWS Free Tier.
 }
 \end{frame}
 
 % ===== SLIDE 5: TECH STACK =====
-\begin{frame}{Technology Stack}
+{
+\setbeamerfont{block title}{size=\large}
+\setbeamerfont{block body}{size=\scriptsize}
+
+\begin{frame}[t]{Technology Stack}
 \framesubtitle{AWS Services and Open-Source Tools}
 
-\begin{columns}[T]
-\begin{column}{0.48\textwidth}
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{0.9}
+
+\vspace{-0.8em}
+
+\begin{columns}[T,onlytextwidth]
+% ---------- LEFT COLUMN ----------
+\column{0.48\textwidth}
 \begin{block}{Frontend}
-{\small
+\vspace{0em}
+\centering
 \begin{tabular}{ll}
 \toprule
 \textbf{Technology} & \textbf{Purpose} \\
@@ -277,103 +293,56 @@ Cognito SDK & Authentication \\
 React Router 7 & Navigation \\
 \bottomrule
 \end{tabular}
-}
+\vspace{0em}
 \end{block}
-\end{column}
 
-\begin{column}{0.48\textwidth}
+% ---------- RIGHT COLUMN ----------
+\column{0.48\textwidth}
 \begin{block}{Backend \& Infrastructure}
-{\small
+\vspace{-0.2em}
+\centering
 \begin{tabular}{ll}
 \toprule
 \textbf{Service} & \textbf{Purpose} \\
 \midrule
 AWS Lambda & Compute (Python) \\
 DynamoDB & Database (6 tables) \\
-API Gateway & HTTP API (16 routes) \\
+API Gateway & HTTP API (19 routes) \\
 S3 & Static hosting + models \\
 EventBridge & Scheduler (1/min) \\
 Cognito & Authentication \\
+SNS & Email notifications \\
+IAM & Access control \& permissions \\
+Docker & Containerization \\
 \bottomrule
 \end{tabular}
-}
+\vspace{-0.2em}
 \end{block}
-\end{column}
 \end{columns}
 
-\vspace{0.4em}
+\vspace{0em}
+
+% ---------- ML PIPELINE ----------
 \begin{block}{ML Pipeline}
-{\small
+\vspace{-0.2em}
+\centering
 \begin{tabular}{lll}
 \toprule
 \textbf{Component} & \textbf{Technology} & \textbf{Details} \\
 \midrule
 Model & scikit-learn GBC & 100 trees, depth 3, LR 0.1 \\
 Training Data & AIOps KPI Dataset & 2.4M timesteps, 26 services \\
-Deployment & Docker on Lambda & Container image from ECR \\
+Deployment & Docker on Lambda & Image from ECR \\
 \bottomrule
 \end{tabular}
-}
+\vspace{-0.2em}
 \end{block}
+
 \end{frame}
-
-% ===== SLIDE 6: DATA MODEL =====
-\begin{frame}{Data Model}
-\framesubtitle{DynamoDB -- Flexible Schema for Heterogeneous Cloud Services}
-
-\begin{columns}[T]
-\begin{column}{0.52\textwidth}
-\begin{block}{6 DynamoDB Tables}
-{\footnotesize
-\begin{tabular}{lp{1.4cm}p{1.2cm}l}
-\toprule
-\textbf{Table} & \textbf{PK} & \textbf{SK} & \textbf{Purpose} \\
-\midrule
-KPIMetrics & service\_id & timestamp & Raw metrics \\
-ServiceLogs & service\_id & timestamp & Event logs \\
-FeatureStore & service\_id & timestamp & 8 features \\
-Alerts & alert\_id & -- & Predictions \\
-Incidents & incident\_id & -- & Grouped alerts \\
-SimConfig & config\_key & -- & Sim state \\
-\bottomrule
-\end{tabular}
 }
-\end{block}
-
-\vspace{0.3em}
-\begin{alertblock}{Why DynamoDB?}
-{\small Each service type produces \textbf{different JSON fields}. DynamoDB's flexible schema stores heterogeneous documents in one table --- no nullable columns needed.}
-\end{alertblock}
-\end{column}
-
-\begin{column}{0.44\textwidth}
-\begin{block}{Variable Schema per Service}
-{\scriptsize
-\textbf{Web API:} response\_time\_ms, requests/sec, error\_rate, http\_5xx\_count\\[3pt]
-\textbf{DB Pool:} active\_connections, query\_duration, deadlock\_count\\[3pt]
-\textbf{Message Queue:} queue\_depth, consumer\_lag, dead\_letter\_size\\[3pt]
-\textbf{Auth Service:} login\_success\_rate, auth\_latency, mfa\_rate\\[3pt]
-\textbf{ML Pipeline:} inference\_latency, accuracy, drift\_score
-}
-\end{block}
-
-\vspace{0.3em}
-\begin{block}{NoSQL Design Choices}
-{\small
-\begin{itemize}
-    \item \textbf{Partition key} = service\_id (query by service)
-    \item \textbf{Sort key} = timestamp (time-range queries)
-    \item \textbf{TTL} on all data tables (24h auto-cleanup)
-    \item \textbf{DynamoDB Streams} trigger pipeline Lambdas
-\end{itemize}
-}
-\end{block}
-\end{column}
-\end{columns}
-\end{frame}
 
 % ===== SLIDE 7: DATA FLOW PIPELINE =====
-\begin{frame}{Data Flow Pipeline}
+\begin{frame}[shrink=4]{Data Flow Pipeline}
 \framesubtitle{Event-Driven, Fully Automatic Processing}
 
 \centering
@@ -391,7 +360,7 @@ SimConfig & config\_key & -- & Sim state \\
 \node[box, right=1.0cm of kpi] (feat) {Feature Eng. $\lambda$\\Compute 8 features};
 \node[dbbox, below=0.8cm of feat] (fs) {FeatureStore\\DynamoDB};
 \node[box, left=1.0cm of fs] (inf) {Inference $\lambda$\\3 GBC models};
-\node[dbbox, left=1.0cm of inf] (alrt) {Alerts +\\Incidents};
+\node[dbbox, left=1.0cm of inf] (alrt) {Alerts \& Notifications +\\Incidents};
 \node[box, left=1.0cm of alrt] (dash) {Dashboard\\(polls 3--5s)};
 
 % Arrows
@@ -408,12 +377,15 @@ SimConfig & config\_key & -- & Sim state \\
 \vspace{0.6em}
 \begin{columns}[T]
 \begin{column}{0.48\textwidth}
-\begin{block}{Simulation Scenarios}
+\begin{block}{6 Simulation Scenarios}
 {\small
 \begin{itemize}
-    \item \textbf{Web API Degradation} -- response times spike, cascade to DB
-    \item \textbf{DB Cascade Failure} -- deadlocks trigger multi-service impact
-    \item \textbf{Baseline} -- normal operations, no incident
+    \item \textbf{Web API Degradation} -- response times spike
+    \item \textbf{DB Cascade Failure} -- deadlocks cascade
+    \item \textbf{MQ Backlog} -- queue depth spikes
+    \item \textbf{Auth Failure} -- login rate drops
+    \item \textbf{ML Drift} -- accuracy degrades
+    \item \textbf{Baseline} -- all healthy
 \end{itemize}
 }
 \end{block}
@@ -435,13 +407,14 @@ Min 12--15 & Recovery phase \\
 \end{frame}
 
 % ===== SLIDE 8: ML MODEL =====
-\begin{frame}{ML Model}
+\begin{frame}[shrink=5]{ML Model}
 \framesubtitle{Gradient Boosting Classifier with KPI + Log-Proxy Features}
 
 \begin{columns}[T]
 \begin{column}{0.45\textwidth}
 \begin{block}{Model Configuration}
 {\small
+\begin{center}  
 \begin{tabular}{ll}
 \toprule
 \textbf{Parameter} & \textbf{Value} \\
@@ -454,6 +427,7 @@ Horizons & 5, 10, 15 min \\
 Training Data & 2.4M timesteps \\
 \bottomrule
 \end{tabular}
+\end{center}
 }
 \end{block}
 
@@ -466,6 +440,7 @@ Training Data & 2.4M timesteps \\
 \begin{column}{0.52\textwidth}
 \begin{block}{8 Engineered Features}
 {\small
+\begin{center}  
 \begin{tabular}{lll}
 \toprule
 \textbf{Feature} & \textbf{Type} & \textbf{Import.} \\
@@ -480,23 +455,25 @@ roll\_slope & KPI & 1.0\% \\
 warn\_rate & \textcolor{UNBRed}{Log} & \textcolor{UNBRed}{0.4\%} \\
 \bottomrule
 \end{tabular}
+\end{center}
 }
 \end{block}
 
 \vspace{0.2em}
-{\small \textbf{Key insight:} Log-proxy features (red) contribute \textbf{31.6\%} of total importance --- multi-signal fusion is essential.}
+{\small \textbf{Key insight:} Log-proxy features (red) contribute \textbf{31.6\%} of total importance, multi-signal fusion is essential.}
 \end{column}
 \end{columns}
 \end{frame}
 
 % ===== SLIDE 9: MODEL PERFORMANCE =====
-\begin{frame}{Model Performance}
+\begin{frame}[shrink=5]{Model Performance}
 \framesubtitle{Best Result: GBC with KPI + Log Features at H=15}
 
 \begin{columns}
 \begin{column}{0.45\textwidth}
 \begin{block}{Performance Metrics}
 {\small
+\begin{center}
 \begin{tabular}{ll}
 \toprule
 \textbf{Metric} & \textbf{Value} \\
@@ -507,12 +484,14 @@ False Alarm Rate & $\leq$ 1/day/service \\
 Detection Rate & 8.7\% \\
 \bottomrule
 \end{tabular}
+\end{center}
 }
 \end{block}
 
 \vspace{0.4em}
 \begin{block}{KPI-Only vs KPI+Logs}
 {\small
+\begin{center}
 \begin{tabular}{lcc}
 \toprule
 \textbf{Model} & \textbf{Prec.} & \textbf{Rec.} \\
@@ -523,6 +502,7 @@ Static Baseline & 0.63 & 0.47 \\
 Moving Avg. & 0.42 & 0.02 \\
 \bottomrule
 \end{tabular}
+\end{center}
 }
 \end{block}
 \end{column}
@@ -566,122 +546,123 @@ Moving Avg. & 0.42 & 0.02 \\
 \end{columns}
 \end{frame}
 
-% ===== SLIDE 10: IMPLEMENTATION -- DASHBOARD =====
-\begin{frame}{Implementation: Dashboard}
-\framesubtitle{React 19 Single-Page Application with 4 Interactive Pages}
+% % ===== SLIDE 10: IMPLEMENTATION -- DASHBOARD =====
+% \begin{frame}{Implementation: Dashboard}
+% \framesubtitle{React 19 Single-Page Application with 4 Interactive Pages}
 
-\begin{columns}[T]
-\begin{column}{0.48\textwidth}
+% \begin{columns}[T]
+% \begin{column}{0.48\textwidth}
 
-\begin{block}{Page 1: Live Controls}
-{\small
-\begin{itemize}
-    \item Start/Stop simulation scenarios
-    \item Scenario selector dropdown
-    \item 5 Service Health Cards with live status
-    \item Summary cards: phase, tick, predictions
-\end{itemize}
-}
-\end{block}
+% \begin{block}{Page 1: Live Controls}
+% {\small
+% \begin{itemize}
+%     \item Start/Stop simulation scenarios
+%     \item Scenario selector dropdown
+%     \item 5 Service Health Cards with live status
+%     \item Summary cards: phase, tick, predictions
+% \end{itemize}
+% }
+% \end{block}
 
-\vspace{0.2em}
-\begin{block}{Page 2: KPI Timeline}
-{\small
-\begin{itemize}
-    \item Real-time scrolling line charts (Recharts)
-    \item Service tabs + ``All Services'' overlay
-    \item Prediction score chart with threshold line
-    \item Horizon toggle: 5m / 10m / 15m
-\end{itemize}
-}
-\end{block}
-\end{column}
+% \vspace{0.2em}
+% \begin{block}{Page 2: KPI Timeline}
+% {\small
+% \begin{itemize}
+%     \item Real-time scrolling line charts (Recharts)
+%     \item Service tabs + ``All Services'' overlay
+%     \item Prediction score chart with threshold line
+%     \item Horizon toggle: 5m / 10m / 15m
+% \end{itemize}
+% }
+% \end{block}
+% \end{column}
 
-\begin{column}{0.48\textwidth}
-\begin{block}{Page 3: Alerts \& Incidents}
-{\small
-\begin{itemize}
-    \item Active alerts with severity badges (Critical/Warning/Info)
-    \item Acknowledge and dismiss actions
-    \item Incident groups with colored phase timeline
-    \item Collapsible alert history section
-\end{itemize}
-}
-\end{block}
+% \begin{column}{0.48\textwidth}
+% \begin{block}{Page 3: Alerts \& Incidents}
+% {\small
+% \begin{itemize}
+%     \item Active alerts with severity badges (Critical/Warning/Info)
+%     \item Acknowledge and dismiss actions
+%     \item Incident groups with colored phase timeline
+%     \item Collapsible alert history section
+% \end{itemize}
+% }
+% \end{block}
 
-\vspace{0.2em}
-\begin{block}{Page 4: Analytics}
-{\small
-\begin{itemize}
-    \item Summary stats: precision, lead time, FAR
-    \item Precision vs Detection Rate scatter chart
-    \item Lead Time Distribution bar chart
-    \item Feature Importance chart (KPI vs Log)
-\end{itemize}
-}
-\end{block}
-\end{column}
-\end{columns}
+% \vspace{0.2em}
+% \begin{block}{Page 4: Analytics}
+% {\small
+% \begin{itemize}
+%     \item Summary stats: precision, lead time, FAR
+%     \item Precision vs Detection Rate scatter chart
+%     \item Lead Time Distribution bar chart
+%     \item Feature Importance chart (KPI vs Log)
+% \end{itemize}
+% }
+% \end{block}
+% \end{column}
+% \end{columns}
 
-\vspace{0.3em}
-\centering
-{\small \textit{[Screenshot placeholders: insert dashboard screenshots on next slide]}}
-\end{frame}
+% \vspace{0.3em}
+% \centering
+% {\small \textit{[Screenshot placeholders: insert dashboard screenshots on next slide]}}
+% \end{frame}
 
-% ===== SLIDE 11: IMPLEMENTATION -- DASHBOARD SCREENSHOTS =====
-\begin{frame}{Dashboard Screenshots}
-\framesubtitle{Live Controls \& KPI Timeline}
+% % ===== SLIDE 11: IMPLEMENTATION -- DASHBOARD SCREENSHOTS =====
+% \begin{frame}{Dashboard Screenshots}
+% \framesubtitle{Live Controls \& KPI Timeline}
 
-\begin{columns}
-\begin{column}{0.48\textwidth}
-\centering
-\begin{tikzpicture}
-\draw[UNBBlue, thick, rounded corners=4pt] (0,0) rectangle (5.2,3.5);
-\node[font=\small, UNBGray] at (2.6,1.75) {\textit{[Screenshot: Live Controls page]}};
-\node[font=\tiny, UNBGray] at (2.6,1.2) {Service Health Cards + Simulation};
-\node[font=\tiny, UNBGray] at (2.6,0.8) {Controls with scenario selection};
-\end{tikzpicture}
-\end{column}
-\begin{column}{0.48\textwidth}
-\centering
-\begin{tikzpicture}
-\draw[UNBBlue, thick, rounded corners=4pt] (0,0) rectangle (5.2,3.5);
-\node[font=\small, UNBGray] at (2.6,1.75) {\textit{[Screenshot: KPI Timeline page]}};
-\node[font=\tiny, UNBGray] at (2.6,1.2) {Real-time KPI charts with prediction};
-\node[font=\tiny, UNBGray] at (2.6,0.8) {score overlay and threshold lines};
-\end{tikzpicture}
-\end{column}
-\end{columns}
+% \begin{columns}
+% \begin{column}{0.48\textwidth}
+% \centering
+% \begin{tikzpicture}
+% \draw[UNBBlue, thick, rounded corners=4pt] (0,0) rectangle (5.2,3.5);
+% \node[font=\small, UNBGray] at (2.6,1.75) {\textit{[Screenshot: Live Controls page]}};
+% \node[font=\tiny, UNBGray] at (2.6,1.2) {Service Health Cards + Simulation};
+% \node[font=\tiny, UNBGray] at (2.6,0.8) {Controls with scenario selection};
+% \end{tikzpicture}
+% \end{column}
+% \begin{column}{0.48\textwidth}
+% \centering
+% \begin{tikzpicture}
+% \draw[UNBBlue, thick, rounded corners=4pt] (0,0) rectangle (5.2,3.5);
+% \node[font=\small, UNBGray] at (2.6,1.75) {\textit{[Screenshot: KPI Timeline page]}};
+% \node[font=\tiny, UNBGray] at (2.6,1.2) {Real-time KPI charts with prediction};
+% \node[font=\tiny, UNBGray] at (2.6,0.8) {score overlay and threshold lines};
+% \end{tikzpicture}
+% \end{column}
+% \end{columns}
 
-\vspace{0.5em}
-\begin{columns}
-\begin{column}{0.48\textwidth}
-\centering
-\begin{tikzpicture}
-\draw[UNBBlue, thick, rounded corners=4pt] (0,0) rectangle (5.2,3.0);
-\node[font=\small, UNBGray] at (2.6,1.5) {\textit{[Screenshot: Alerts page]}};
-\node[font=\tiny, UNBGray] at (2.6,1.0) {Alert cards + incident timeline};
-\end{tikzpicture}
-\end{column}
-\begin{column}{0.48\textwidth}
-\centering
-\begin{tikzpicture}
-\draw[UNBBlue, thick, rounded corners=4pt] (0,0) rectangle (5.2,3.0);
-\node[font=\small, UNBGray] at (2.6,1.5) {\textit{[Screenshot: Analytics page]}};
-\node[font=\tiny, UNBGray] at (2.6,1.0) {Model comparison charts};
-\end{tikzpicture}
-\end{column}
-\end{columns}
-\end{frame}
+% \vspace{0.5em}
+% \begin{columns}
+% \begin{column}{0.48\textwidth}
+% \centering
+% \begin{tikzpicture}
+% \draw[UNBBlue, thick, rounded corners=4pt] (0,0) rectangle (5.2,3.0);
+% \node[font=\small, UNBGray] at (2.6,1.5) {\textit{[Screenshot: Alerts page]}};
+% \node[font=\tiny, UNBGray] at (2.6,1.0) {Alert cards + incident timeline};
+% \end{tikzpicture}
+% \end{column}
+% \begin{column}{0.48\textwidth}
+% \centering
+% \begin{tikzpicture}
+% \draw[UNBBlue, thick, rounded corners=4pt] (0,0) rectangle (5.2,3.0);
+% \node[font=\small, UNBGray] at (2.6,1.5) {\textit{[Screenshot: Analytics page]}};
+% \node[font=\tiny, UNBGray] at (2.6,1.0) {Model comparison charts};
+% \end{tikzpicture}
+% \end{column}
+% \end{columns}
+% \end{frame}
 
 % ===== SLIDE 12: IMPLEMENTATION -- BACKEND =====
-\begin{frame}{Implementation: Backend}
-\framesubtitle{12 Lambda Functions with Event-Driven Processing}
+\begin{frame}[shrink=6]{Implementation: Backend}
+\framesubtitle{13 Lambda Functions with Event-Driven Processing}
 
 \begin{columns}[T]
 \begin{column}{0.48\textwidth}
 \begin{block}{Lambda Functions (from AWS)}
 {\footnotesize
+\begin{center}
 \begin{tabular}{ll}
 \toprule
 \textbf{Function} & \textbf{Trigger} \\
@@ -699,8 +680,10 @@ threshold\_lambda & API Gateway \\
 control\_simulation & API Gateway \\
 get\_metrics\_lambda & API Gateway \\
 get\_logs\_lambda & API Gateway \\
+notification\_lambda & API Gateway\\
 \bottomrule
 \end{tabular}
+\end{center}
 }
 \end{block}
 \end{column}
@@ -723,7 +706,7 @@ get\_logs\_lambda & API Gateway \\
 \begin{block}{API Gateway Configuration}
 {\small
 \begin{itemize}
-    \item HTTP API with \textbf{16 routes}
+    \item HTTP API with \textbf{19 routes}
     \item All routes protected by \textbf{JWT Authorizer}
     \item CORS configured for frontend origin
     \item Rate limiting: 10K req/s burst
@@ -735,7 +718,7 @@ get\_logs\_lambda & API Gateway \\
 \end{frame}
 
 % ===== SLIDE 13: SECURITY =====
-\begin{frame}{Security Architecture}
+\begin{frame}[shrink=11]{Security Architecture}
 \framesubtitle{Authentication, Authorization, and Encryption}
 
 \begin{columns}[T]
@@ -754,6 +737,7 @@ get\_logs\_lambda & API Gateway \\
 \vspace{0.3em}
 \begin{block}{Encryption}
 {\small
+\begin{center}
 \begin{tabular}{ll}
 \toprule
 \textbf{Scope} & \textbf{Method} \\
@@ -765,6 +749,7 @@ Auth in transit & TLS 1.2+ \\
 AWS internal & TLS 1.2+ \\
 \bottomrule
 \end{tabular}
+\end{center}
 }
 \end{block}
 \end{column}
@@ -802,15 +787,27 @@ HTTP 401 without valid JWT token.
 \end{column}
 \end{columns}
 \end{frame}
+% ===== SLIDE 16: Live Demo moved up =====
+\begin{frame}{Live Demo}
+\framesubtitle{Watch the Model Detect an Incident in Real Time}
+
+\centering
+\vspace{1cm}
+
+{\large \href{http://cloud-project-dashboard1.s3-website-us-east-1.amazonaws.com/}{Open Dashboard Demo}}
+
+\end{frame}
 
 % ===== SLIDE 14: OWASP + TESTING =====
-\begin{frame}{Security Audit \& Testing}
+\begin{frame}[shrink=15]{Security Audit \& Testing}
 \framesubtitle{OWASP Top 10 Assessment + Integration Test Results}
 
+\vspace{-0.6em}
 \begin{columns}[T]
 \begin{column}{0.48\textwidth}
 \begin{block}{OWASP Top 10 Results}
-{\scriptsize
+{\small
+\begin{center}
 \begin{tabular}{lll}
 \toprule
 \textbf{\#} & \textbf{Vulnerability} & \textbf{Status} \\
@@ -827,6 +824,7 @@ A09 & Security Logging & \textcolor{UNBGreen}{\textbf{Pass}} \\
 A10 & SSRF & N/A \\
 \bottomrule
 \end{tabular}
+\end{center}
 }
 \end{block}
 \vspace{0.2em}
@@ -836,6 +834,7 @@ A10 & SSRF & N/A \\
 \begin{column}{0.48\textwidth}
 \begin{block}{Integration Testing Summary}
 {\small
+\begin{center}
 \begin{tabular}{lc}
 \toprule
 \textbf{Category} & \textbf{Tests} \\
@@ -853,12 +852,13 @@ Cross-Cutting (Theme, etc.) & 7 planned \\
 \textbf{Total} & \textbf{50+ cases} \\
 \bottomrule
 \end{tabular}
+\end{center}
 }
 \end{block}
 
 \vspace{0.2em}
 \begin{alertblock}{Additional Checks}
-{\footnotesize CORS, Rate Limiting, Input Validation, Error Handling, Secrets Management, DynamoDB TTL --- all passed.}
+{\footnotesize CORS, Rate Limiting, Input Validation, Error Handling, Secrets Management, DynamoDB TTL, all passed.}
 \end{alertblock}
 \end{column}
 \end{columns}
@@ -870,85 +870,164 @@ Cross-Cutting (Theme, etc.) & 7 planned \\
 
 \begin{columns}[T]
 \begin{column}{0.48\textwidth}
-\begin{block}{Challenge 1: Low Recall vs High Precision}
+\begin{block}{Challenge 1: Lambda Package Size Limitation}
 {\small
-\textbf{Problem:} Detection rate was only 8.7\%\\
-\textbf{Solution:} Prioritized precision (0.91) for operator trust. High recall with many false alarms is worse than selective, trustworthy alerts.\\
-\textbf{Lesson:} In AIOps, precision $>$ recall for operational adoption.
-}
-\end{block}
-
-\vspace{0.3em}
-\begin{block}{Challenge 2: Cold Start Latency}
-{\small
-\textbf{Problem:} Lambda cold starts delayed inference when loading scikit-learn models.\\
-\textbf{Solution:} Docker container deployment + model caching in Lambda global scope. Models load once and persist across invocations.
+\textbf{Problem:} Deploying the model with Python ML libraries exceeded AWS Lambda package size limits.\\
+\textbf{Solution:} Used Docker container deployment to package the dependencies and model together, avoiding the space limitation.
+\\
 }
 \end{block}
 \end{column}
 
 \begin{column}{0.48\textwidth}
-\begin{block}{Challenge 3: Heterogeneous Data Schema}
+\begin{block}{Challenge 2: Heterogeneous Data Schema}
 {\small
 \textbf{Problem:} 5 services produce completely different JSON structures.\\
-\textbf{Solution:} Used DynamoDB's flexible schema --- each service stores its own document shape. Feature Engineering extracts one primary metric per service for the model.
-}
-\end{block}
-
-\vspace{0.3em}
-\begin{block}{Challenge 4: Real-Time Pipeline Orchestration}
-{\small
-\textbf{Problem:} Needed automatic, event-driven data flow without polling.\\
-\textbf{Solution:} DynamoDB Streams trigger Lambdas automatically: KPIMetrics $\rightarrow$ Feature Eng. $\rightarrow$ Inference. Zero orchestration code needed.
+\textbf{Solution:} Used DynamoDB's flexible schema, each service stores its own document shape. Feature Engineering extracts one primary metric per service for the model.
 }
 \end{block}
 \end{column}
 \end{columns}
 \end{frame}
 
+
+
 % ===== SLIDE 16: LIVE DEMO FLOW =====
-\begin{frame}{Live Demo}
-\framesubtitle{Watch the Model Detect an Incident in Real Time}
+% \begin{frame}{Live Demo}
+% \framesubtitle{Watch the Model Detect an Incident in Real Time}
 
-\centering
-\begin{tikzpicture}[
-  node distance=0.6cm,
-  step/.style={rectangle, rounded corners=4pt, draw=UNBBlue, fill=UNBLightGray, minimum width=11cm, minimum height=0.55cm, font=\small, align=left},
-  highlight/.style={rectangle, rounded corners=4pt, draw=UNBGreen, fill=green!10, minimum width=11cm, minimum height=0.55cm, font=\small\bfseries, align=left},
-  num/.style={circle, draw=UNBBlue, fill=UNBBlue, text=white, font=\tiny\bfseries, minimum size=0.4cm, inner sep=0pt}
-]
+% \centering
+% \begin{tikzpicture}[
+%   node distance=0.6cm,
+%   step/.style={rectangle, rounded corners=4pt, draw=UNBBlue, fill=UNBLightGray, minimum width=11cm, minimum height=0.55cm, font=\small, align=left},
+%   highlight/.style={rectangle, rounded corners=4pt, draw=UNBGreen, fill=green!10, minimum width=11cm, minimum height=0.55cm, font=\small\bfseries, align=left},
+%   num/.style={circle, draw=UNBBlue, fill=UNBBlue, text=white, font=\tiny\bfseries, minimum size=0.4cm, inner sep=0pt}
+% ]
 
-\node[step] (s1) {Open dashboard \& select ``Web API Degradation'' scenario};
-\node[step, below=of s1] (s2) {Click Start Simulation --- EventBridge begins generating data};
-\node[step, below=of s2] (s3) {Watch KPI Timeline --- all services show normal behavior (min 0--5)};
-\node[step, below=of s3] (s4) {Web API response times start creeping up (min 5--7)};
-\node[highlight, below=of s4] (s5) {Prediction score rises --- model fires alert \textbf{before} full incident (min 7--8)};
-\node[step, below=of s5] (s6) {Full incident develops across Web API + DB Pool (min 9--12)};
-\node[step, below=of s6] (s7) {Recovery phase --- metrics trend back to normal (min 12--15)};
-\node[step, below=of s7] (s8) {Switch to Analytics page --- view precision, lead time, feature importance};
+% \node[step] (s1) {Open dashboard \& select ``Web API Degradation'' scenario};
+% \node[step, below=of s1] (s2) {Click Start Simulation --- EventBridge begins generating data};
+% \node[step, below=of s2] (s3) {Watch KPI Timeline --- all services show normal behavior (min 0--5)};
+% \node[step, below=of s3] (s4) {Web API response times start creeping up (min 5--7)};
+% \node[highlight, below=of s4] (s5) {Prediction score rises --- model fires alert \textbf{before} full incident (min 7--8)};
+% \node[step, below=of s5] (s6) {Full incident develops across Web API + DB Pool (min 9--12)};
+% \node[step, below=of s6] (s7) {Recovery phase --- metrics trend back to normal (min 12--15)};
+% \node[step, below=of s7] (s8) {Switch to Analytics page --- view precision, lead time, feature importance};
 
-% Numbers
-\node[num] at ([xshift=-5.9cm]s1.west) {1};
-\node[num] at ([xshift=-5.9cm]s2.west) {2};
-\node[num] at ([xshift=-5.9cm]s3.west) {3};
-\node[num] at ([xshift=-5.9cm]s4.west) {4};
-\node[num] at ([xshift=-5.9cm]s5.west) {5};
-\node[num] at ([xshift=-5.9cm]s6.west) {6};
-\node[num] at ([xshift=-5.9cm]s7.west) {7};
-\node[num] at ([xshift=-5.9cm]s8.west) {8};
+% % Numbers
+% \node[num] at ([xshift=-5.9cm]s1.west) {1};
+% \node[num] at ([xshift=-5.9cm]s2.west) {2};
+% \node[num] at ([xshift=-5.9cm]s3.west) {3};
+% \node[num] at ([xshift=-5.9cm]s4.west) {4};
+% \node[num] at ([xshift=-5.9cm]s5.west) {5};
+% \node[num] at ([xshift=-5.9cm]s6.west) {6};
+% \node[num] at ([xshift=-5.9cm]s7.west) {7};
+% \node[num] at ([xshift=-5.9cm]s8.west) {8};
 
-\end{tikzpicture}
+% \end{tikzpicture}
 
-\vspace{0.3em}
-{\small Total demo time: $\sim$10--15 minutes. The model provides early warning 2+ minutes before the incident fully develops.}
-\end{frame}
+% \vspace{0.3em}
+% {\small Total demo time: $\sim$10--15 minutes. The model provides early warning 2+ minutes before the incident fully develops.}
+% \end{frame}
 
-% ===== SLIDE 17: CONCLUSION =====
-\begin{frame}{Conclusion}
-\framesubtitle{Summary of Achievements}
+% % ===== SLIDE 17: CONCLUSION =====
+% \begin{frame}{Conclusion}
+% \framesubtitle{Summary of Achievements}
 
-\begin{columns}
-\begin{column}{0.58\textwidth}
+% \begin{columns}
+% \begin{column}{0.58\textwidth}
+% \begin{block}{What We Built}
+% \begin{enumerate}
+%     \item A \textbf{fully serverless} AIOps platform on AWS
+%     \item \textbf{ML-powered} incident prediction with 0.91 precision
+%     \item \textbf{Event-driven} pipeline: data $\rightarrow$ features $\rightarrow$ alerts (automatic)
+%     \item \textbf{Interactive dashboard} with real-time visualization
+%     \item \textbf{Comprehensive security}: Cognito auth, JWT, AES-256, OWASP audit
+% \end{enumerate}
+% \end{block}
+
+% \vspace{0.3em}
+% \begin{block}{Key Numbers}
+% {\small
+% \begin{tabular}{ll}
+% 12 Lambda Functions & 6 DynamoDB Tables \\
+% 16 API Routes (JWT) & 5 Monitored Services \\
+% 3 ML Models & 50+ Test Cases \\
+% 8 Engineered Features & 9/10 OWASP Passed \\
+% \end{tabular}
+% }
+% \end{block}
+% \end{column}
+
+% \begin{column}{0.38\textwidth}
+% \begin{alertblock}{Core Achievement}
+% {\small Predictive models don't just detect earlier --- they produce \textbf{more trustworthy alerts} with \textbf{fewer false alarms}, leading to higher operator trust.}
+% \end{alertblock}
+
+% \vspace{0.3em}
+% \begin{block}{Practical Impact}
+% {\small
+% Fewer false alarms\\
+% $\downarrow$\\
+% Higher on-call trust\\
+% $\downarrow$\\
+% Faster incident response\\
+% $\downarrow$\\
+% \textbf{Better cloud reliability}
+% }
+% \end{block}
+% \end{column}
+% \end{columns}
+% \end{frame}
+
+% % ===== SLIDE 18: FUTURE WORK =====
+% \begin{frame}{Future Work}
+% \framesubtitle{Potential Improvements and Extensions}
+
+% \begin{columns}[T]
+% \begin{column}{0.48\textwidth}
+% \begin{block}{Technical Extensions}
+% \begin{itemize}
+%     \item Replace synthetic log-proxies with \textbf{real system logs}
+%     \item Add \textbf{cross-service correlation} for cascading failure detection
+%     \item Test deeper models: \textbf{LSTM}, \textbf{Transformer}
+%     \item \textbf{Hyperparameter tuning} for improved recall
+%     \item Add \textbf{CloudFront CDN} for HTTPS frontend hosting
+% \end{itemize}
+% \end{block}
+% \end{column}
+
+% \begin{column}{0.48\textwidth}
+% \begin{block}{Operational Improvements}
+% \begin{itemize}
+%     \item \textbf{Online model updating} for concept drift
+%     \item Real production traffic integration
+%     \item \textbf{Multi-metric models} per service
+%     \item Automated \textbf{CI/CD pipeline} for model retraining
+%     \item Role-based access control (admin vs viewer)
+% \end{itemize}
+% \end{block}
+% \end{column}
+% \end{columns}
+
+% \vspace{0.5em}
+% \begin{block}{Known Limitations (Transparency)}
+% {\small
+% \begin{tabular}{ll}
+% \textbf{Limitation} & \textbf{Rationale} \\
+% \midrule
+% Low recall (8.7\%) & Precision prioritized for operator trust \\
+% Synthetic data & Controlled scenarios for consistent demos \\
+% One metric per service & Simplicity; multi-metric is a future extension \\
+% \end{tabular}
+% }
+% \end{block}
+% \end{frame}
+
+\begin{frame}[shrink=14]{Conclusion and Future Work}
+\framesubtitle{What We Built and What Comes Next}
+
+\begin{columns}[T]
+\begin{column}{0.56\textwidth}
 \begin{block}{What We Built}
 \begin{enumerate}
     \item A \textbf{fully serverless} AIOps platform on AWS
@@ -959,12 +1038,12 @@ Cross-Cutting (Theme, etc.) & 7 planned \\
 \end{enumerate}
 \end{block}
 
-\vspace{0.3em}
+\vspace{0.25em}
 \begin{block}{Key Numbers}
 {\small
 \begin{tabular}{ll}
-12 Lambda Functions & 6 DynamoDB Tables \\
-16 API Routes (JWT) & 5 Monitored Services \\
+13 Lambda Functions & 6 DynamoDB Tables \\
+19 API Routes (JWT) & 5 Monitored Services \\
 3 ML Models & 50+ Test Cases \\
 8 Engineered Features & 9/10 OWASP Passed \\
 \end{tabular}
@@ -972,69 +1051,26 @@ Cross-Cutting (Theme, etc.) & 7 planned \\
 \end{block}
 \end{column}
 
-\begin{column}{0.38\textwidth}
+\begin{column}{0.40\textwidth}
 \begin{alertblock}{Core Achievement}
-{\small Predictive models don't just detect earlier --- they produce \textbf{more trustworthy alerts} with \textbf{fewer false alarms}, leading to higher operator trust.}
+{\small Predictive models don't just detect earlier, they produce \textbf{more trustworthy alerts} with \textbf{fewer false alarms}, leading to higher operator trust.}
 \end{alertblock}
 
-\vspace{0.3em}
-\begin{block}{Practical Impact}
+\vspace{0.25em}
+\begin{block}{Future Work}
 {\small
-Fewer false alarms\\
-$\downarrow$\\
-Higher on-call trust\\
-$\downarrow$\\
-Faster incident response\\
-$\downarrow$\\
-\textbf{Better cloud reliability}
-}
-\end{block}
-\end{column}
-\end{columns}
-\end{frame}
-
-% ===== SLIDE 18: FUTURE WORK =====
-\begin{frame}{Future Work}
-\framesubtitle{Potential Improvements and Extensions}
-
-\begin{columns}[T]
-\begin{column}{0.48\textwidth}
-\begin{block}{Technical Extensions}
 \begin{itemize}
-    \item Replace synthetic log-proxies with \textbf{real system logs}
+    \item Integrate \textbf{real system logs} and production traffic
+    \item Add \textbf{multi-metric models} for each service
+    \item Explore deeper models such as \textbf{LSTM} and \textbf{Transformer}
+    \item Apply \textbf{hyperparameter tuning} to improve recall
     \item Add \textbf{cross-service correlation} for cascading failure detection
-    \item Test deeper models: \textbf{LSTM}, \textbf{Transformer}
-    \item \textbf{Hyperparameter tuning} for improved recall
-    \item Add \textbf{CloudFront CDN} for HTTPS frontend hosting
 \end{itemize}
-\end{block}
-\end{column}
-
-\begin{column}{0.48\textwidth}
-\begin{block}{Operational Improvements}
-\begin{itemize}
-    \item \textbf{Online model updating} for concept drift
-    \item Real production traffic integration
-    \item \textbf{Multi-metric models} per service
-    \item Automated \textbf{CI/CD pipeline} for model retraining
-    \item Role-based access control (admin vs viewer)
-\end{itemize}
+}
 \end{block}
 \end{column}
 \end{columns}
 
-\vspace{0.5em}
-\begin{block}{Known Limitations (Transparency)}
-{\small
-\begin{tabular}{ll}
-\textbf{Limitation} & \textbf{Rationale} \\
-\midrule
-Low recall (8.7\%) & Precision prioritized for operator trust \\
-Synthetic data & Controlled scenarios for consistent demos \\
-One metric per service & Simplicity; multi-metric is a future extension \\
-\end{tabular}
-}
-\end{block}
 \end{frame}
 
 % ===== SLIDE 19: THANK YOU =====
@@ -1055,142 +1091,11 @@ One metric per service & Simplicity; multi-metric is a future extension \\
 {\small
 \textbf{Team:} Akinbobola Akin $\cdot$ Alfarizy Alfarizy $\cdot$ Ishimwe Pacis Hanyurwimfura\\[0.5em]
 \textbf{Live Dashboard:}\\
-\texttt{cloud-project-dashboard1.s3-website.ca-central-1.amazonaws.com}\\[0.5em]
+\texttt{http://cloud-project-dashboard1.s3-website-us-east-1.amazonaws.com/}\\[0.5em]
 \textbf{API Endpoint:}\\
 \texttt{p9fpx4nhh6.execute-api.ca-central-1.amazonaws.com}
 }
 \end{center}
-\end{frame}
-
-% ================================================================
-% BACKUP SLIDES (for Q\&A)
-% ================================================================
-
-% ===== BACKUP 1: AWS RESOURCES =====
-\begin{frame}{Backup: AWS Resources (Live)}
-\framesubtitle{Verified via AWS CLI on March 22, 2026}
-
-\begin{columns}[T]
-\begin{column}{0.48\textwidth}
-\begin{block}{DynamoDB Tables (6)}
-{\small
-\begin{tabular}{lc}
-\toprule
-\textbf{Table} & \textbf{Items} \\
-\midrule
-KPIMetrics & 1,330 \\
-FeatureStore & Active \\
-Alerts & Active \\
-Incidents & Active \\
-ServiceLogs & Active \\
-SimConfig & Active \\
-\bottomrule
-\end{tabular}
-}
-\end{block}
-
-\begin{block}{S3 Buckets}
-{\small
-\begin{itemize}
-    \item \texttt{cloud-project-dashboard1}\\(frontend + models)
-    \item \texttt{cloud-project-layers-rizy}\\(Lambda layers)
-\end{itemize}
-}
-\end{block}
-\end{column}
-
-\begin{column}{0.48\textwidth}
-\begin{block}{Lambda Functions (12)}
-{\scriptsize
-simulator\_lambda, feature\_engineering\_lambda, inference\_lambda, services\_lambda, kpi\_lambda, alerts\_lambda, incidents\_lambda, analytics\_lambda, threshold\_lambda, control\_simulation\_lambda, get\_metrics\_lambda, get\_logs\_lambda
-}
-\end{block}
-
-\vspace{0.2em}
-\begin{block}{Other Services}
-{\small
-\begin{tabular}{ll}
-\toprule
-\textbf{Service} & \textbf{Detail} \\
-\midrule
-API Gateway & HTTP API, 16 routes \\
-Cognito & Pool ``CloudWatchAI'' \\
-Region & ca-central-1 \\
-\bottomrule
-\end{tabular}
-}
-\end{block}
-\end{column}
-\end{columns}
-\end{frame}
-
-% ===== BACKUP 2: API ROUTES =====
-\begin{frame}{Backup: API Routes (All JWT-Protected)}
-\framesubtitle{16 Routes on API Gateway \texttt{p9fpx4nhh6}}
-
-{\small
-\begin{tabular}{lll}
-\toprule
-\textbf{Method} & \textbf{Route} & \textbf{Auth} \\
-\midrule
-GET & /services & JWT \\
-GET & /kpi/\{serviceId\} & JWT \\
-GET & /thresholds & JWT \\
-GET & /alerts/active & JWT \\
-GET & /alerts/history & JWT \\
-POST & /alerts/\{id\}/acknowledge & JWT \\
-GET & /incidents & JWT \\
-GET & /simulation/state & JWT \\
-POST & /simulation/start & JWT \\
-POST & /simulation/stop & JWT \\
-GET & /analytics/summary & JWT \\
-GET & /analytics/methods & JWT \\
-GET & /analytics/features & JWT \\
-GET & /analytics/lead-times & JWT \\
-GET & /metrics & JWT \\
-GET & /logs & JWT \\
-\bottomrule
-\end{tabular}
-}
-
-\vspace{0.3em}
-{\small All routes use the same Cognito JWT Authorizer. Unauthenticated requests return HTTP 401.}
-\end{frame}
-
-% ===== BACKUP 3: SECURITY DIAGRAM =====
-\begin{frame}{Backup: Security Flow}
-\framesubtitle{End-to-End Authentication and Encryption}
-
-\centering
-\begin{tikzpicture}[scale=0.75, transform shape,
-  box/.style={rectangle, rounded corners=4pt, draw=UNBBlue, fill=UNBLightGray, minimum width=2.4cm, minimum height=0.75cm, font=\scriptsize, align=center},
-  secure/.style={rectangle, rounded corners=4pt, draw=UNBGreen, fill=green!8, minimum width=2.4cm, minimum height=0.75cm, font=\scriptsize, align=center},
-  arrow/.style={-{Stealth[length=5pt]}, thick, UNBBlue},
-  sarrow/.style={-{Stealth[length=5pt]}, thick, UNBGreen},
-  label/.style={font=\tiny, UNBGray, midway, above}
-]
-
-\node[box] (browser) at (0,3) {Browser\\(React SPA)};
-\node[secure] (cognito) at (4,3) {AWS Cognito\\(SRP Auth)};
-\node[secure] (apigw) at (8,3) {API Gateway\\(JWT Verify)};
-\node[box] (lambda) at (8,1) {Lambda\\(IAM Role)};
-\node[secure] (dynamo) at (4,1) {DynamoDB\\(AES-256)};
-\node[secure] (s3) at (0,1) {S3 Bucket\\(SSE-S3)};
-
-\draw[sarrow] (browser) -- node[label] {TLS 1.2+} (cognito);
-\draw[sarrow] (cognito) -- node[label] {JWT} (apigw);
-\draw[arrow] (apigw) -- node[label, right, xshift=2pt] {IAM} (lambda);
-\draw[sarrow] (lambda) -- node[label] {TLS 1.2+} (dynamo);
-\draw[sarrow] (lambda) -- node[label, below, yshift=-2pt] {TLS 1.2+} (s3);
-
-% Encryption labels
-\node[font=\tiny, UNBGreen] at (4,0.3) {Encrypted at rest};
-\node[font=\tiny, UNBGreen] at (0,0.3) {Encrypted at rest};
-
-\end{tikzpicture}
-
-\vspace{0.5em}
-{\small Every communication path is encrypted in transit (TLS 1.2+). All data stores use AES-256 encryption at rest. Authentication uses Cognito SRP protocol --- passwords never transmitted.}
 \end{frame}
 
 \end{document}
